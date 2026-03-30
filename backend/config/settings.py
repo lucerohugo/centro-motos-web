@@ -158,7 +158,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
 
     # ⚠️ CAMBIAR POR TU FRONT REAL
-    "https://centro-motos-web2.vercel.app/",
+    "https://centro-motos-web2.vercel.app",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
