@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Inicio{% endblock %}
+
+{% block content %}
+<h1>Bienvenido al sistema de gestión de CentroMotos</h1>
+
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-md-6">
+      <a href="/admin/gestion/articulo/" class="btn btn-primary btn-lg w-100 mb-3">📦 Artículos</a>
+    </div>
+    <div class="col-md-6">
+      <a href="/admin/gestion/cliente/" class="btn btn-secondary btn-lg w-100 mb-3">👥 Clientes</a>
+    </div>
+    <div class="col-md-6">
+      <a href="/admin/gestion/stock/" class="btn btn-success btn-lg w-100 mb-3">📊 Stock</a>
+    </div>
+    <div class="col-md-6">
+      <a href="/admin/gestion/pedido/" class="btn btn-danger btn-lg w-100 mb-3">📋 Pedidos</a>
+    </div>
+    <div class="col-md-6">
+      <a href="/admin/gestion/provincia/" class="btn btn-info btn-lg w-100 mb-3">🌍 Provincias</a>
+    </div>
+    <div class="col-md-6">
+      <a href="/admin/gestion/revendedor/" class="btn btn-warning btn-lg w-100 mb-3">💼 Revendedores</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

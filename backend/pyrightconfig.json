@@ -1,0 +1,8 @@
+{
+  "include": ["gestion", "config"],
+  "pythonVersion": "3.12",
+  "pythonPlatform": "Windows",
+  "typeCheckingMode": "standard",
+  "venvPath": "./",
+  "venv": "venv"
+}
