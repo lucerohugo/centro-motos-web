@@ -98,3 +98,12 @@ temp/
 # Lock files (opcional - descomenta si no quieres subir)
 # package-lock.json
 # yarn.lock
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Django
+db.sqlite3
+staticfiles/
+media/

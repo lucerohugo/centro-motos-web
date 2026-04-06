@@ -17,7 +17,7 @@ interface RevendedorData {
   telefono: string
   celular: string
   email: string
-  rev_logo_url?: string
+  rev_logo_url?: string | null
 }
 
 const menuItems = [
@@ -54,26 +54,17 @@ export default function Page() {
 
   // Verificar si existe logo del revendedor
   const checkLogoRevendedor = (revendedorData: RevendedorData, forceRefresh = false) => {
-    // Primero intentar con el logo del backend
+    // Usar el logo del backend si está disponible
     if (revendedorData.rev_logo_url) {
-      const logoUrl = revendedorData.rev_logo_url
       if (forceRefresh) {
-        setLogoRevendedor(logoUrl + '?t=' + Date.now())
+        setLogoRevendedor(revendedorData.rev_logo_url + '?t=' + Date.now())
       } else {
-        setLogoRevendedor(logoUrl)
+        setLogoRevendedor(revendedorData.rev_logo_url)
       }
-      return
+    } else {
+      // No hay logo - dejar en null (no mostrar nada)
+      setLogoRevendedor(null)
     }
-    
-    // Fallback: buscar en /revendedor/{id}.png (legacy)
-    const timestamp = forceRefresh ? Date.now() : logoTimestamp
-    if (forceRefresh) setLogoTimestamp(timestamp)
-    
-    const logoPath = `/revendedor/${revendedorData.id}.png`
-    const img = new Image()
-    img.onload = () => setLogoRevendedor(logoPath + '?t=' + timestamp)
-    img.onerror = () => setLogoRevendedor(null)
-    img.src = logoPath + '?t=' + timestamp
   }
 
   const handleUploadLogo = async () => {
@@ -98,32 +89,31 @@ export default function Page() {
         })
 
         if (response.ok) {
-          // Refetch datos del revendedor para obtener rev_logo_url actualizado
-          const revendedorResponse = await fetch(`${API_BASE}/api/gestion/revendedores/${revendedor.id}/`)
-          if (revendedorResponse.ok) {
-            const revendedorData = await revendedorResponse.json()
-            const updatedRevendedor = {
-              id: revendedorData.rev_codi,
-              destino: revendedorData.rev_dest || 0,
-              nombre: revendedorData.rev_nomb,
-              direccion: revendedorData.rev_dire || '',
-              telefono: revendedorData.rev_tele || '',
-              celular: '',
-              email: revendedorData.rev_emai || '',
-              rev_logo_url: revendedorData.rev_logo_url || null,
-            }
-            setRevendedor(updatedRevendedor)
-            guardarLogin(updatedRevendedor)
-            // Notificar al header de cambios
-            window.dispatchEvent(new Event('revendedor-updated'))
-            checkLogoRevendedor(updatedRevendedor, true)
-            setShowSettings(false)
+          const revendedorData = await response.json()
+          // El POST devuelve el serializer completo con rev_logo_url
+          const updatedRevendedor = {
+            id: revendedorData.rev_codi,
+            destino: revendedorData.rev_dest || 0,
+            nombre: revendedorData.rev_nomb,
+            direccion: revendedorData.rev_dire || '',
+            telefono: revendedorData.rev_tele || '',
+            celular: '',
+            email: revendedorData.rev_emai || '',
+            rev_logo_url: revendedorData.rev_logo_url || null,
           }
+          setRevendedor(updatedRevendedor)
+          guardarLogin(updatedRevendedor)
+          // Notificar al header de cambios
+          window.dispatchEvent(new Event('revendedor-updated'))
+          checkLogoRevendedor(updatedRevendedor, true)
+          setShowSettings(false)
         } else {
-          alert('Error al guardar el logo')
+          const errorData = await response.json()
+          alert(`Error al guardar el logo: ${errorData.error || 'Error desconocido'}`)
         }
-      } catch (err) {
-        alert('Error al subir el logo')
+      } catch (err: unknown) {
+        const errorMsg = err instanceof Error ? err.message : String(err)
+        alert('Error al subir el logo: ' + errorMsg)
       } finally {
         setUploadingLogo(false)
       }
@@ -143,31 +133,22 @@ export default function Page() {
       })
 
       if (response.ok) {
-        // Refetch datos del revendedor para asegurar consistencia
-        const revendedorResponse = await fetch(`${API_BASE}/api/gestion/revendedores/${revendedor.id}/`)
-        if (revendedorResponse.ok) {
-          const revendedorData = await revendedorResponse.json()
-          const updatedRevendedor = {
-            id: revendedorData.rev_codi,
-            destino: revendedorData.rev_dest || 0,
-            nombre: revendedorData.rev_nomb,
-            direccion: revendedorData.rev_dire || '',
-            telefono: revendedorData.rev_tele || '',
-            celular: '',
-            email: revendedorData.rev_emai || '',
-            rev_logo_url: revendedorData.rev_logo_url || null,
-          }
-          setRevendedor(updatedRevendedor)
-          guardarLogin(updatedRevendedor)
-          // Notificar al header de cambios
-          window.dispatchEvent(new Event('revendedor-updated'))
+        const updatedRevendedor = {
+          ...revendedor,
+          rev_logo_url: null
         }
+        setRevendedor(updatedRevendedor)
+        guardarLogin(updatedRevendedor)
+        // Notificar al header de cambios
+        window.dispatchEvent(new Event('revendedor-updated'))
         setLogoRevendedor(null)
       } else {
-        alert('Error al eliminar el logo')
+        const errorData = await response.json()
+        alert(`Error al eliminar el logo: ${errorData.error || 'Error desconocido'}`)
       }
-    } catch (err) {
-      alert('Error al eliminar el logo')
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : String(err)
+      alert('Error al eliminar el logo: ' + errorMsg)
     }
   }
 
@@ -178,8 +159,9 @@ export default function Page() {
       if (!result.success) {
         alert(result.error || 'Error al abrir Cuenta Corriente')
       }
-    } catch (err) {
-      alert('Error al abrir Cuenta Corriente')
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : String(err)
+      alert('Error al abrir Cuenta Corriente: ' + errorMsg)
     } finally {
       setLoadingCC(false)
     }

@@ -48,7 +48,7 @@ def main():
         log(f"⏳ Esperando {DELAY_SEGUNDOS} segundos...")
         time.sleep(DELAY_SEGUNDOS)
 
-        url = "https://centro-motos-web.onrender.com/api/gestion/articulos/"
+        url = "http://138.36.237.49:8000/api/gestion/articulos/"
         log(f"URL: {url}")
 
         # =========================

@@ -158,19 +158,35 @@ REST_FRAMEWORK = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-
-    # FRONT
+    
+    # FRONTEND VERCEL
     "https://centro-motos-web2.vercel.app",
-
-
+    
+    # VPS (para acceso directo si es necesario)
+    "http://138.36.237.49:8000",
+    "http://138.36.237.49",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     "http://138.36.237.49",
+    "http://138.36.237.49:8000",
     "https://centro-motos-web2.vercel.app"
 ]
 
 CORS_ALLOW_CREDENTIALS = True
+
+# Permitir preflight requests
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
 
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': os.environ.get('CLOUD_NAME'),

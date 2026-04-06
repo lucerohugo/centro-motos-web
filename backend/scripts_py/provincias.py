@@ -39,7 +39,7 @@ def main():
         # =========================
         # REQUEST
         # =========================
-        url = "https://centro-motos-web.onrender.com/api/gestion/provincias/"
+        url = "http://138.36.237.49:8000/api/gestion/provincias/"
         log(f"URL: {url}")
 
         payload = {

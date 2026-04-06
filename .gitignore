@@ -136,3 +136,12 @@ public/revendedor/
 *.rar
 *.7z
 *.iso
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Django
+db.sqlite3
+staticfiles/
+media/
