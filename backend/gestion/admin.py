@@ -64,11 +64,11 @@ class RubroAdmin(admin.ModelAdmin):
 
 @admin.register(Subrubro)
 class SubrubroAdmin(admin.ModelAdmin):
-    list_display = ['sru_codi', 'sru_nomb', 'sru_rubr']
-    list_filter = ['sru_rubr']
+    list_display = ['sru_codi', 'sru_nomb', 'rub_codi']
+    list_filter = ['rub_codi']
     search_fields = ['sru_nomb']
     readonly_fields = ['sru_codi']
-    ordering = ['sru_rubr', 'sru_nomb']
+    ordering = ['rub_codi', 'sru_nomb']
 
 
 @admin.register(Color)

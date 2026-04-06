@@ -59,17 +59,17 @@ class Rubro(models.Model):
 class Subrubro(models.Model):
     """Sub-rubros/categorías dentro de un rubro"""
     sru_codi = models.AutoField(primary_key=True)
-    sru_rubr = models.ForeignKey(Rubro, on_delete=models.PROTECT, related_name="subrubros")
+    rub_codi = models.ForeignKey(Rubro, on_delete=models.PROTECT, related_name="subrubros")
     sru_nomb = models.CharField(max_length=100)
 
     class Meta:
         verbose_name = "Sub-rubro"
         verbose_name_plural = "Sub-rubros"
-        ordering = ["sru_rubr_id", "sru_nomb"]
-        unique_together = ("sru_rubr", "sru_nomb")
+        ordering = ["rub_codi_id", "sru_nomb"]
+        unique_together = ("rub_codi", "sru_nomb")
 
     def __str__(self):
-        return f"{self.sru_nomb} ({self.sru_rubr.rub_nomb})"
+        return f"{self.sru_nomb} ({self.rub_codi.rub_nomb})"
 
 
 # ================================================================

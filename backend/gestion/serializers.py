@@ -156,19 +156,10 @@ class RevendedorSerializer(serializers.ModelSerializer):
         read_only_fields = ['rev_codi', 'rev_logo_url']
 
     def get_rev_logo_url(self, obj):
-        """Retorna la URL completa del logo"""
         if obj.rev_logo:
             request = self.context.get('request')
             if request:
                 return request.build_absolute_uri(obj.rev_logo.url)
-            # Si no hay request, construir URL manualmente
-            from django.conf import settings
-            if settings.DEBUG:
-                # En desarrollo: http://localhost:8000/media/revendedores/...
-                return f'http://localhost:8000{obj.rev_logo.url}'
-            else:
-                # En producción: usar el dominio configurado
-                return obj.rev_logo.url
         return None
 
 

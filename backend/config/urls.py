@@ -16,5 +16,6 @@ urlpatterns = [
 ]
 
 # Servir media files en desarrollo
-# saco esto: if settings.DEBUG:
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# En producción, el servidor web (nginx/Apache) se encarga de servir /media/
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

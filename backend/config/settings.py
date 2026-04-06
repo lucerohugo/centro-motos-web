@@ -1,6 +1,8 @@
 from pathlib import Path
 import dj_database_url
 import os
+import cloudinary
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -12,9 +14,9 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-dev-key')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = [
+    "138.36.237.49",
     "localhost",
     "127.0.0.1",
-    ".onrender.com",
 ]
 
 # ================================================================
@@ -164,7 +166,16 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://centro-motos-web2.vercel.app" 
+    "http://138.36.237.49",
+    "https://centro-motos-web2.vercel.app"
 ]
 
 CORS_ALLOW_CREDENTIALS = True
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.environ.get('CLOUD_NAME'),
+    'API_KEY': os.environ.get('API_KEY'),
+    'API_SECRET': os.environ.get('API_SECRET'),
+}
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
