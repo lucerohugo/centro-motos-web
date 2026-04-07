@@ -171,8 +171,9 @@ CORS_ALLOWED_ORIGINS = [
 CSRF_TRUSTED_ORIGINS = [
     "http://138.36.237.49",
     "http://138.36.237.49:8000",
-    "https://centro-motos-web2.vercel.app"
-    "https://centro-motos-web2-hugos-projects-eb634449.vercel.app"
+    "https://centro-motos-web2.vercel.app",
+    "https://centro-motos-web2-hugos-projects-eb634449.vercel.app",
+    "https://api.brixsoft.com",  
 ]
 
 CORS_ALLOW_CREDENTIALS = True
