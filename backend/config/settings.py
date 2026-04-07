@@ -14,7 +14,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-dev-key')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = [
-    "138.36.237.49",
+    "api.brixsoft.com",
     "localhost",
     "127.0.0.1",
 ]
@@ -161,6 +161,7 @@ CORS_ALLOWED_ORIGINS = [
     
     # FRONTEND VERCEL
     "https://centro-motos-web2.vercel.app",
+    "https://centro-motos-web2-hugos-projects-eb634449.vercel.app"
     
     # VPS (para acceso directo si es necesario)
     "http://138.36.237.49:8000",
@@ -171,6 +172,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://138.36.237.49",
     "http://138.36.237.49:8000",
     "https://centro-motos-web2.vercel.app"
+    "https://centro-motos-web2-hugos-projects-eb634449.vercel.app"
 ]
 
 CORS_ALLOW_CREDENTIALS = True
