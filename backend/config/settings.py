@@ -161,7 +161,7 @@ CORS_ALLOWED_ORIGINS = [
     
     # FRONTEND VERCEL
     "https://centro-motos-web2.vercel.app",
-    "https://centro-motos-web2-hugos-projects-eb634449.vercel.app"
+    "https://centro-motos-web2-hugos-projects-eb634449.vercel.app",
     
     # VPS (para acceso directo si es necesario)
     "http://138.36.237.49:8000",
@@ -176,6 +176,7 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = True
 
 # Permitir preflight requests
 CORS_ALLOW_HEADERS = [
