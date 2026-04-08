@@ -4,9 +4,6 @@ import json
 import time
 from datetime import datetime
 
-# =========================
-# CONFIG
-# =========================
 DELAY_SEGUNDOS = 30
 
 def log(msg):
@@ -16,35 +13,30 @@ def main():
     try:
         log("=== INICIO SCRIPT MARCAS ===")
 
-        # =========================
-        # ARGUMENTOS
-        # =========================
         log(f"sys.argv: {sys.argv}")
 
-        if len(sys.argv) < 2:
+        if len(sys.argv) < 3:
             log("❌ Faltan parámetros")
-            log("Uso: python marcas.py <mar_nomb>")
+            log("Uso: python marcas.py <mar_codi> <mar_nomb>")
             return
 
-        mar_nomb = sys.argv[1]
+        mar_codi = int(sys.argv[1])
+        mar_nomb = sys.argv[2]
 
+        log(f"mar_codi: {mar_codi}")
         log(f"mar_nomb: {mar_nomb}")
 
-        # =========================
-        # DELAY
-        # =========================
         log(f"⏳ Esperando {DELAY_SEGUNDOS} segundos...")
         time.sleep(DELAY_SEGUNDOS)
 
-        # =========================
-        # REQUEST
-        # =========================
-        url = "http://138.36.237.49:8000/api/gestion/marcas/"
+        # ✅ NUEVA URL (Brixsoft)
+        url = "http://api.brixsoft.com/api/gestion/marcas/"
         log(f"URL: {url}")
 
         payload = {
             "marcas": [
                 {
+                    "mar_codi": mar_codi,
                     "mar_nomb": mar_nomb
                 }
             ]
@@ -55,9 +47,6 @@ def main():
         log("🚀 Enviando request...")
         response = requests.post(url, json=payload)
 
-        # =========================
-        # RESPUESTA
-        # =========================
         log("===== RESPUESTA =====")
         log(f"Status Code: {response.status_code}")
         log(f"Contenido: {response.text}")

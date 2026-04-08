@@ -21,17 +21,19 @@ def main():
         # =========================
         log(f"sys.argv: {sys.argv}")
 
-        if len(sys.argv) < 2:
+        if len(sys.argv) < 3:
             log("❌ Faltan parámetros")
-            log("Uso: python provincias.py <pci_nomb>")
+            log("Uso: python provincias.py <pci_codi> <pci_nomb>")
             return
 
-        pci_nomb = sys.argv[1]
+        pci_codi = int(sys.argv[1])
+        pci_nomb = sys.argv[2]
 
+        log(f"pci_codi: {pci_codi}")
         log(f"pci_nomb: {pci_nomb}")
 
         # =========================
-        # DELAY FIJO
+        # DELAY
         # =========================
         log(f"⏳ Esperando {DELAY_SEGUNDOS} segundos...")
         time.sleep(DELAY_SEGUNDOS)
@@ -39,12 +41,13 @@ def main():
         # =========================
         # REQUEST
         # =========================
-        url = "http://138.36.237.49:8000/api/gestion/provincias/"
+        url = "http://api.brixsoft.com/api/gestion/provincias/"
         log(f"URL: {url}")
 
         payload = {
             "provincias": [
                 {
+                    "pci_codi": pci_codi,
                     "pci_nomb": pci_nomb
                 }
             ]
@@ -66,7 +69,6 @@ def main():
 
     except Exception as e:
         log(f"❌ ERROR: {str(e)}")
-
 
 if __name__ == "__main__":
     main()

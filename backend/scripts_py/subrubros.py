@@ -4,9 +4,6 @@ import json
 import time
 from datetime import datetime
 
-# =========================
-# CONFIG
-# =========================
 DELAY_SEGUNDOS = 30
 
 def log(msg):
@@ -16,39 +13,34 @@ def main():
     try:
         log("=== INICIO SCRIPT SUBRUBROS ===")
 
-        # =========================
-        # ARGUMENTOS
-        # =========================
         log(f"sys.argv: {sys.argv}")
 
-        if len(sys.argv) < 3:
+        if len(sys.argv) < 4:
             log("❌ Faltan parámetros")
-            log("Uso: python subrubros.py <sru_nomb> <rub_codi>")
+            log("Uso: python subrubros.py <sru_codi> <sru_nomb> <rub_codi>")
             return
 
-        sru_nomb = sys.argv[1]
-        rub_codi = sys.argv[2]
+        sru_codi = int(sys.argv[1])
+        sru_nomb = sys.argv[2]
+        rub_codi = int(sys.argv[3])
 
+        log(f"sru_codi: {sru_codi}")
         log(f"sru_nomb: {sru_nomb}")
         log(f"rub_codi: {rub_codi}")
 
-        # =========================
-        # DELAY
-        # =========================
         log(f"⏳ Esperando {DELAY_SEGUNDOS} segundos...")
         time.sleep(DELAY_SEGUNDOS)
 
-        # =========================
-        # REQUEST
-        # =========================
-        url = "http://138.36.237.49:8000/api/gestion/subrubros/"
+        # ✅ NUEVA URL
+        url = "http://api.brixsoft.com/api/gestion/subrubros/"
         log(f"URL: {url}")
 
         payload = {
             "subrubros": [
                 {
+                    "sru_codi": sru_codi,
                     "sru_nomb": sru_nomb,
-                    "rub_codi": int(rub_codi)
+                    "rub_codi": rub_codi
                 }
             ]
         }
@@ -58,9 +50,6 @@ def main():
         log("🚀 Enviando request...")
         response = requests.post(url, json=payload)
 
-        # =========================
-        # RESPUESTA
-        # =========================
         log("===== RESPUESTA =====")
         log(f"Status Code: {response.status_code}")
         log(f"Contenido: {response.text}")

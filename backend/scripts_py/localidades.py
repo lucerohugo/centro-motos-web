@@ -21,16 +21,22 @@ def main():
         # =========================
         log(f"sys.argv: {sys.argv}")
 
-        if len(sys.argv) < 3:
+        if len(sys.argv) < 4:
             log("❌ Faltan parámetros")
-            log("Uso: python localidades.py <loc_nomb> <pci_codi>")
+            log("Uso: python localidades.py <loc_codi> <loc_nomb> <pci_codi> [loc_cpos]")
             return
 
-        loc_nomb = sys.argv[1]
-        pci_codi = sys.argv[2]
+        loc_codi = int(sys.argv[1])
+        loc_nomb = sys.argv[2]
+        pci_codi = int(sys.argv[3])
 
+        # opcional
+        loc_cpos = sys.argv[4] if len(sys.argv) > 4 else None
+
+        log(f"loc_codi: {loc_codi}")
         log(f"loc_nomb: {loc_nomb}")
         log(f"pci_codi: {pci_codi}")
+        log(f"loc_cpos: {loc_cpos}")
 
         # =========================
         # DELAY
@@ -41,16 +47,21 @@ def main():
         # =========================
         # REQUEST
         # =========================
-        url = "http://138.36.237.49:8000/api/gestion/localidades/"
+        url = "http://api.brixsoft.com/api/gestion/localidades/"
         log(f"URL: {url}")
 
+        data = {
+            "loc_codi": loc_codi,
+            "loc_nomb": loc_nomb,
+            "pci_codi": pci_codi
+        }
+
+        # solo lo agrega si viene
+        if loc_cpos:
+            data["loc_cpos"] = loc_cpos
+
         payload = {
-            "localidades": [
-                {
-                    "loc_nomb": loc_nomb,
-                    "pci_codi": int(pci_codi)
-                }
-            ]
+            "localidades": [data]
         }
 
         log(f"Payload: {json.dumps(payload)}")
@@ -69,7 +80,6 @@ def main():
 
     except Exception as e:
         log(f"❌ ERROR: {str(e)}")
-
 
 if __name__ == "__main__":
     main()

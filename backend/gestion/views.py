@@ -35,26 +35,87 @@ class BaseViewSet(viewsets.ModelViewSet):
 # ================================================================
 # UBICACIONES GEOGRÁFICAS
 # ================================================================
+#nuevo de prueba con la api para cargar a la base de datos 
 class ProvinciaViewSet(BaseViewSet):
     queryset = Provincia.objects.all()
     serializer_class = ProvinciaSerializer
     search_fields = ['pci_nomb']
     ordering = ['pci_nomb']
 
+    def create(self, request, *args, **kwargs):
+        data = request.data
 
+        if not data.get("pci_codi") or not data.get("pci_nomb"):
+            return Response(
+                {"error": "pci_codi y pci_nomb son requeridos"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            obj, created = Provincia.objects.update_or_create(
+                pci_codi=data["pci_codi"],
+                defaults={
+                    "pci_nomb": data["pci_nomb"]
+                }
+            )
+
+            return Response({
+                "pci_codi": obj.pci_codi,
+                "pci_nomb": obj.pci_nomb,
+                "created": created
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({
+                "error": str(e),
+                "data": data
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+# nuevo para probar api
 class LocalidadViewSet(BaseViewSet):
     queryset = Localidad.objects.all()
     serializer_class = LocalidadSerializer
     search_fields = ['loc_nomb', 'pci_codi__pci_nomb']
     filterset_fields = ['pci_codi']
     ordering = ['pci_codi', 'loc_nomb']
-    
+
+    def create(self, request, *args, **kwargs):
+        data = request.data
+
+        if not data.get("loc_codi") or not data.get("pci_codi") or not data.get("loc_nomb"):
+            return Response(
+                {"error": "loc_codi, loc_nomb y pci_codi son requeridos"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            obj, created = Localidad.objects.update_or_create(
+                loc_codi=data["loc_codi"],
+                defaults={
+                    "loc_nomb": data["loc_nomb"],
+                    "pci_codi_id": data["pci_codi"],
+                    "loc_cpos": data.get("loc_cpos")
+                }
+            )
+
+            return Response({
+                "loc_codi": obj.loc_codi,
+                "loc_nomb": obj.loc_nomb,
+                "created": created
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({
+                "error": str(e),
+                "data": data
+            }, status=status.HTTP_400_BAD_REQUEST)
+
     @action(detail=False, methods=['get'])
     def frontend(self, request):
-        """Retornar localidades en formato esperado por el frontend"""
         queryset = self.filter_queryset(self.get_queryset())
         serializer = LocalidadFrontendSerializer(queryset, many=True)
         return Response(serializer.data)
+    
 
 
 class CondicionIvaViewSet(BaseViewSet):
