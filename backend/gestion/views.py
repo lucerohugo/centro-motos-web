@@ -45,31 +45,33 @@ class ProvinciaViewSet(BaseViewSet):
     def create(self, request, *args, **kwargs):
         data = request.data
 
-        if not data.get("pci_codi") or not data.get("pci_nomb"):
-            return Response(
-                {"error": "pci_codi y pci_nomb son requeridos"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        if not isinstance(data, list):
+            data = [data]
 
-        try:
-            obj, created = Provincia.objects.update_or_create(
-                pci_codi=data["pci_codi"],
-                defaults={
-                    "pci_nomb": data["pci_nomb"]
-                }
-            )
+        resultados = []
 
-            return Response({
-                "pci_codi": obj.pci_codi,
-                "pci_nomb": obj.pci_nomb,
-                "created": created
-            }, status=status.HTTP_200_OK)
+        for item in data:
+            try:
+                obj, created = Provincia.objects.update_or_create(
+                    pci_codi=item.get("pci_codi"),
+                    defaults={
+                        "pci_nomb": item.get("pci_nomb")
+                    }
+                )
 
-        except Exception as e:
-            return Response({
-                "error": str(e),
-                "data": data
-            }, status=status.HTTP_400_BAD_REQUEST)
+                resultados.append({
+                    "pci_codi": obj.pci_codi,
+                    "pci_nomb": obj.pci_nomb,
+                    "created": created
+                })
+
+            except Exception as e:
+                resultados.append({
+                    "error": str(e),
+                    "data": item
+                })
+
+        return Response(resultados, status=status.HTTP_200_OK)
 
 # nuevo para probar api
 class LocalidadViewSet(BaseViewSet):
@@ -82,39 +84,35 @@ class LocalidadViewSet(BaseViewSet):
     def create(self, request, *args, **kwargs):
         data = request.data
 
-        if not data.get("loc_codi") or not data.get("pci_codi") or not data.get("loc_nomb"):
-            return Response(
-                {"error": "loc_codi, loc_nomb y pci_codi son requeridos"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        if not isinstance(data, list):
+            data = [data]
 
-        try:
-            obj, created = Localidad.objects.update_or_create(
-                loc_codi=data["loc_codi"],
-                defaults={
-                    "loc_nomb": data["loc_nomb"],
-                    "pci_codi_id": data["pci_codi"],
-                    "loc_cpos": data.get("loc_cpos")
-                }
-            )
+        resultados = []
 
-            return Response({
-                "loc_codi": obj.loc_codi,
-                "loc_nomb": obj.loc_nomb,
-                "created": created
-            }, status=status.HTTP_200_OK)
+        for item in data:
+            try:
+                obj, created = Localidad.objects.update_or_create(
+                    loc_codi=item.get("loc_codi"),
+                    defaults={
+                        "loc_nomb": item.get("loc_nomb"),
+                        "pci_codi_id": item.get("pci_codi"),
+                        "loc_cpos": item.get("loc_cpos")
+                    }
+                )
 
-        except Exception as e:
-            return Response({
-                "error": str(e),
-                "data": data
-            }, status=status.HTTP_400_BAD_REQUEST)
+                resultados.append({
+                    "loc_codi": obj.loc_codi,
+                    "loc_nomb": obj.loc_nomb,
+                    "created": created
+                })
 
-    @action(detail=False, methods=['get'])
-    def frontend(self, request):
-        queryset = self.filter_queryset(self.get_queryset())
-        serializer = LocalidadFrontendSerializer(queryset, many=True)
-        return Response(serializer.data)
+            except Exception as e:
+                resultados.append({
+                    "error": str(e),
+                    "data": item
+                })
+
+        return Response(resultados, status=status.HTTP_200_OK)
     
 
 
