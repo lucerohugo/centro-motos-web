@@ -100,7 +100,7 @@ class ArticuloSerializer(serializers.ModelSerializer):
             'art_tiva', 'art_tiva_nomb',
             'art_fchc', 'art_fmod'
         ]
-        read_only_fields = ['art_codi', 'art_fchc', 'art_fmod']
+        read_only_fields = ['art_fchc', 'art_fmod']
 
 
 # ================================================================
