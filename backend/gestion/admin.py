@@ -21,7 +21,6 @@ class LocalidadAdmin(admin.ModelAdmin):
     list_display = ['loc_codi', 'loc_nomb', 'loc_cpos', 'pci_codi']
     list_filter = ['pci_codi']
     search_fields = ['loc_nomb', 'pci_codi__pci_nomb']
-    readonly_fields = ['loc_codi']
     fieldsets = (
         ('Identificación', {
             'fields': ('loc_codi', 'loc_nomb')
@@ -58,7 +57,6 @@ class RubroAdmin(admin.ModelAdmin):
     list_display = ['rub_codi', 'rub_nomb', 'mar_codi']
     list_filter = ['mar_codi']
     search_fields = ['rub_nomb']
-    readonly_fields = ['rub_codi']
     ordering = ['mar_codi', 'rub_nomb']
 
 
@@ -67,7 +65,6 @@ class SubrubroAdmin(admin.ModelAdmin):
     list_display = ['sru_codi', 'sru_nomb', 'rub_codi']
     list_filter = ['rub_codi']
     search_fields = ['sru_nomb']
-    readonly_fields = ['sru_codi']
     ordering = ['rub_codi', 'sru_nomb']
 
 
@@ -90,7 +87,7 @@ class ArticulosAdmin(admin.ModelAdmin):
     list_display = ['art_codi', 'art_nomb', 'art_mode', 'art_plis', 'art_prec', 'mar_codi', 'rub_codi']
     list_filter = ['mar_codi', 'rub_codi', 'sru_codi']
     search_fields = ['art_nomb', 'art_codi', 'art_mode']
-    readonly_fields = ['art_codi', 'art_fchc', 'art_fmod']
+    readonly_fields = ['art_fchc', 'art_fmod']
     fieldsets = (
         ('Identificación', {
             'fields': ('art_codi', 'art_nomb', 'art_mode')
@@ -116,7 +113,6 @@ class RevendedorAdmin(admin.ModelAdmin):
     list_display = ['rev_codi', 'rev_nomb', 'rev_porc', 'rev_actv', 'loc_codi']
     list_filter = ['rev_actv', 'loc_codi']
     search_fields = ['rev_nomb', 'rev_doc']
-    readonly_fields = ['rev_codi']
     fieldsets = (
         ('Identificación', {
             'fields': ('rev_codi', 'rev_nomb', 'rev_doc')
@@ -143,7 +139,7 @@ class ClientesAdmin(admin.ModelAdmin):
     list_display = ['cli_codi', 'cli_nomb', 'cli_ndoc', 'cli_emai', 'loc_codi', 'civ_codi']
     list_filter = ['loc_codi', 'civ_codi']
     search_fields = ['cli_nomb', 'cli_ndoc', 'cli_emai', 'cli_cuit']
-    readonly_fields = ['cli_codi', 'cli_fchc', 'cli_fmod']
+    readonly_fields = ['cli_fchc', 'cli_fmod']
     fieldsets = (
         ('Datos del Comprador', {
             'fields': ('cli_codi', 'cli_nomb', 'cli_fnac', 'cli_tdoc', 'cli_ndoc', 'cli_cuit')
@@ -175,7 +171,7 @@ class StockAdmin(admin.ModelAdmin):
     list_display = ['stk_codi', 'art_codi', 'col_codi', 'art_ncha', 'art_nmot', 'art_mode', 'art_dest', 'art_usad', 'art_bdis']
     list_filter = ['art_dest', 'art_usad', 'art_bdis', 'col_codi']
     search_fields = ['art_codi__art_nomb', 'art_ncha', 'art_nmot', 'art_ncer']
-    readonly_fields = ['stk_codi', 'stk_fcre', 'stk_fmod']
+    readonly_fields = ['stk_fcre', 'stk_fmod']
     fieldsets = (
         ('Artículo', {
             'fields': ('stk_codi', 'art_codi', 'col_codi', 'art_mode')
@@ -204,7 +200,6 @@ class ConfirmacionVentaAdmin(admin.ModelAdmin):
     list_display = ['con_codi', 'con_marc', 'con_rubr', 'con_suru', 'con_arti', 'con_reve', 'con_prec', 'con_porc']
     list_filter = ['con_marc', 'con_rubr', 'con_reve']
     search_fields = ['con_arti__art_nomb']
-    readonly_fields = ['con_codi']
     fieldsets = (
         ('Identificación', {
             'fields': ('con_codi', 'con_reve')
@@ -282,7 +277,6 @@ class PedidosAdmin(admin.ModelAdmin):
 class GeneralAdmin(admin.ModelAdmin):
     list_display = ['gen_codi', 'gen_nomb']
     fields = ['gen_codi', 'gen_nomb', 'gen_logo', 'gen_loge']
-    readonly_fields = ['gen_codi']
 
 
 # ================================================================
