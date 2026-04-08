@@ -7,7 +7,7 @@ from django.utils import timezone
 # Provincia
 # ================================================================
 class Provincia(models.Model):
-    pci_codi = models.AutoField(primary_key=True)
+    pci_codi = models.IntegerField(primary_key=True)
     pci_nomb = models.CharField(max_length=100)
 
     class Meta:
@@ -23,7 +23,7 @@ class Provincia(models.Model):
 # Marca
 # ================================================================
 class Marca(models.Model):
-    mar_codi = models.AutoField(primary_key=True)
+    mar_codi = models.IntegerField(primary_key=True)
     mar_nomb = models.CharField(max_length=100, unique=True)
 
     class Meta:
@@ -40,7 +40,7 @@ class Marca(models.Model):
 # ================================================================
 class Rubro(models.Model):
     """Rubros/Categorías de artículos"""
-    rub_codi = models.AutoField(primary_key=True)
+    rub_codi = models.IntegerField(primary_key=True)
     rub_nomb = models.CharField(max_length=100, unique=True)
     mar_codi = models.ForeignKey(Marca, on_delete=models.PROTECT, related_name="rubros")
 
@@ -58,7 +58,7 @@ class Rubro(models.Model):
 # ================================================================
 class Subrubro(models.Model):
     """Sub-rubros/categorías dentro de un rubro"""
-    sru_codi = models.AutoField(primary_key=True)
+    sru_codi = models.IntegerField(primary_key=True)
     rub_codi = models.ForeignKey(Rubro, on_delete=models.PROTECT, related_name="subrubros")
     sru_nomb = models.CharField(max_length=100)
 
@@ -77,7 +77,7 @@ class Subrubro(models.Model):
 # ================================================================
 class Color(models.Model):
     """Colores de motocicletas"""
-    col_codi = models.AutoField(primary_key=True)
+    col_codi = models.IntegerField(primary_key=True)
     col_nomb = models.CharField(max_length=100, unique=True)
 
     class Meta:
@@ -94,7 +94,7 @@ class Color(models.Model):
 # ================================================================
 class Comprobante(models.Model):
     """Tipos de factura/comprobantes - mapea COMP.DBF"""
-    com_codi = models.AutoField(primary_key=True)
+    com_codi = models.IntegerField(primary_key=True)
     com_nomb = models.CharField(max_length=30, help_text="Nombre del comprobante")
     com_letr = models.CharField(max_length=1, blank=True, null=True, help_text="Letra: A, B, C, M, X, Z")
     com_abre = models.CharField(max_length=4, blank=True, null=True, help_text="Abreviación: FACT, N.CR, N.DE, etc.")
@@ -119,7 +119,7 @@ class Comprobante(models.Model):
 # ================================================================
 class CondicionIva(models.Model):
     """Condiciones de IVA"""
-    civ_codi = models.AutoField(primary_key=True)
+    civ_codi = models.IntegerField(primary_key=True)
     civ_nomb = models.CharField(max_length=100, unique=True)
 
     class Meta:
@@ -135,7 +135,7 @@ class CondicionIva(models.Model):
 # Localidad
 # ================================================================
 class Localidad(models.Model):
-    loc_codi = models.AutoField(primary_key=True)
+    loc_codi = models.IntegerField(primary_key=True)
     loc_nomb = models.CharField(max_length=100)
     loc_cpos = models.CharField(max_length=5, blank=True, null=True, help_text="Código postal")
     pci_codi = models.ForeignKey(Provincia, on_delete=models.PROTECT, related_name="localidades")
@@ -154,7 +154,7 @@ class Localidad(models.Model):
 # ================================================================
 class Articulos(models.Model):
     """Artículos/Motocicletas"""
-    art_codi = models.AutoField(primary_key=True)
+    art_codi = models.IntegerField(primary_key=True)
     art_nomb = models.CharField(max_length=150)
     art_mode = models.CharField(max_length=100, blank=True, null=True, help_text="Modelo")
     
@@ -190,7 +190,7 @@ class Articulos(models.Model):
 # ================================================================
 class Revendedor(models.Model):
     """Revendedores"""
-    rev_codi = models.AutoField(primary_key=True)
+    rev_codi = models.IntegerField(primary_key=True)
     rev_nomb = models.CharField(max_length=100)
     rev_logo = models.ImageField(upload_to='revendedores/', blank=True, null=True, help_text="Logo del revendedor")
     rev_doc = models.CharField(max_length=20, blank=True, null=True)
@@ -233,7 +233,7 @@ class Revendedor(models.Model):
 # ================================================================
 class Stock(models.Model):
     """Stock detallado de artículos - mapea STKM.DBF"""
-    stk_codi = models.AutoField(primary_key=True)
+    stk_codi = models.IntegerField(primary_key=True)
     art_codi = models.ForeignKey(Articulos, on_delete=models.CASCADE, related_name="stock", help_text="ART_CODI")
     col_codi = models.ForeignKey(Color, on_delete=models.SET_NULL, null=True, blank=True, help_text="COL_CODI")
     art_ncha = models.CharField(max_length=20, blank=True, null=True, help_text="Número de chasis")
@@ -282,7 +282,7 @@ class ConfirmacionVenta(models.Model):
     Si con_reve = NULL/blank, se aplica a TODOS los revendedores (configuración global).
     La configuración específica del revendedor tiene prioridad sobre la global.
     """
-    con_codi = models.AutoField(primary_key=True)
+    con_codi = models.IntegerField(primary_key=True)
     con_marc = models.ForeignKey(Marca, on_delete=models.PROTECT, related_name="confvta_marca")
     con_rubr = models.ForeignKey(Rubro, on_delete=models.PROTECT, related_name="confvta_rubro")
     con_suru = models.ForeignKey(Subrubro, on_delete=models.SET_NULL, null=True, blank=True, related_name="confvta_subrubro")
@@ -313,7 +313,7 @@ class ConfirmacionVenta(models.Model):
 class Clientes(models.Model):
     """Clientes compradores - con datos de cónyuge opcionales incluidos"""
     # Comprador
-    cli_codi = models.AutoField(primary_key=True)
+    cli_codi = models.IntegerField(primary_key=True)
     cli_nomb = models.CharField(max_length=150, help_text="Apellido y nombre del comprador")
     cli_fnac = models.DateField(blank=True, null=True, help_text="Fecha de nacimiento")
     cli_tdoc = models.CharField(max_length=20, default="DNI", help_text="Tipo de documento: DNI, PAS")
@@ -447,7 +447,7 @@ class Pedidos(models.Model):
 # ================================================================
 class General(models.Model):
     """Datos generales de la empresa"""
-    gen_codi = models.AutoField(primary_key=True)
+    gen_codi = models.IntegerField(primary_key=True)
     gen_nomb = models.CharField(max_length=150, blank=True, help_text="Nombre de la empresa")
     gen_logo = models.ImageField(upload_to='logos/', blank=True, null=True, help_text="Logo de Centro Motos")
     gen_loge = models.ImageField(upload_to='logos/', blank=True, null=True, help_text="Logo de BrixSoft")
