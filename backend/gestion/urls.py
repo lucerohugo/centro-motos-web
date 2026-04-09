@@ -9,8 +9,8 @@ from .views import (
     upload_revendedor_logo, delete_revendedor_logo
 )
 
-# Router REST
-router = DefaultRouter()
+# 👇 CLAVE: agregar trailing_slash opcional
+router = DefaultRouter(trailing_slash='/?')
 
 # Ubicaciones geográficas
 router.register(r'provincias', ProvinciaViewSet, basename='provincia')
@@ -46,7 +46,7 @@ router.register(r'general', GeneralViewSet, basename='general')
 
 urlpatterns = [
     path('', include(router.urls)),
-    # Rutas explícitas para upload/delete de logo
+
     path('revendedores/<int:pk>/upload-logo/', upload_revendedor_logo, name='upload-logo'),
     path('revendedores/<int:pk>/delete-logo/', delete_revendedor_logo, name='delete-logo'),
 ]
