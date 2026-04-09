@@ -2,26 +2,14 @@ from rest_framework import viewsets, filters, status
 from rest_framework.decorators import action, api_view, parser_classes
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
-from django_filters.rest_framework import DjangoFilterBackend
-from django.contrib.auth.hashers import check_password
-from django.db import transaction, IntegrityError
-
 from rest_framework.parsers import MultiPartParser, FormParser
+from django_filters.rest_framework import DjangoFilterBackend
+from django.db import IntegrityError, transaction
 
-from .models import (
-    Provincia, Localidad, Marca, Rubro, Subrubro, Color, Comprobante,
-    CondicionIva, Articulos, Revendedor, Stock, ConfirmacionVenta,
-    Clientes, Pedidos, Usuario, General
-)
+from django.contrib.auth.hashers import check_password
 
-from .serializers import (
-    ProvinciaSerializer, LocalidadSerializer, MarcaSerializer, RubroSerializer,
-    SubrubroSerializer, ColorSerializer, ComprobanteSerializer,
-    RevendedorSerializer, ClientesSerializer, ArticuloSerializer,
-    UsuarioSerializer, PedidosSerializer, PedidosCompletoSerializer,
-    CondicionIvaSerializer, StockSerializer,
-    ConfirmacionVentaSerializer, GeneralSerializer
-)
+from .models import *
+from .serializers import *
 
 
 # ================================================================
@@ -34,21 +22,21 @@ class StandardPagination(PageNumberPagination):
 
 
 # ================================================================
-# BASE
+# BASE VIEWSET
 # ================================================================
 class BaseViewSet(viewsets.ModelViewSet):
     permission_classes = []
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    pagination_class = StandardPagination
 
 
 # ================================================================
-# 🔥 MIXIN REUTILIZABLE (CLAVE)
+# MIXIN GENÉRICO PARA IMPORT MASIVO (🔥 CLAVE)
 # ================================================================
-class BulkUpsertMixin:
-    lookup_field = None
-    fields_map = {}
+class BulkCreateMixin:
+    lookup_field_name = None  # ej: 'rub_codi'
 
-    def bulk_upsert(self, request):
+    def create(self, request, *args, **kwargs):
         data = request.data
 
         if not isinstance(data, list):
@@ -58,26 +46,18 @@ class BulkUpsertMixin:
 
         for item in data:
             try:
-                lookup_value = item.get(self.lookup_field)
-
-                if not lookup_value:
-                    raise ValueError(f"Falta campo {self.lookup_field}")
-
-                defaults = {}
-
-                for model_field, payload_field in self.fields_map.items():
-                    defaults[model_field] = item.get(payload_field)
-
                 with transaction.atomic():
+                    lookup = {self.lookup_field_name: item.get(self.lookup_field_name)}
+
                     obj, created = self.queryset.model.objects.update_or_create(
-                        **{self.lookup_field: lookup_value},
-                        defaults=defaults
+                        **lookup,
+                        defaults=item
                     )
 
-                resultados.append({
-                    "id": lookup_value,
-                    "created": created
-                })
+                    resultados.append({
+                        "id": getattr(obj, self.lookup_field_name),
+                        "created": created
+                    })
 
             except IntegrityError as e:
                 resultados.append({
@@ -88,7 +68,7 @@ class BulkUpsertMixin:
 
             except Exception as e:
                 resultados.append({
-                    "error": "GeneralError",
+                    "error": "Exception",
                     "detalle": str(e),
                     "data": item
                 })
@@ -99,165 +79,130 @@ class BulkUpsertMixin:
 # ================================================================
 # UBICACIONES
 # ================================================================
-class ProvinciaViewSet(BulkUpsertMixin, BaseViewSet):
+class ProvinciaViewSet(BulkCreateMixin, BaseViewSet):
     queryset = Provincia.objects.all()
     serializer_class = ProvinciaSerializer
-    search_fields = ['pci_nomb']
-    ordering = ['pci_nomb']
-
-    lookup_field = "pci_codi"
-    fields_map = {
-        "pci_nomb": "pci_nomb"
-    }
-
-    def create(self, request, *args, **kwargs):
-        return self.bulk_upsert(request)
+    lookup_field_name = "pci_codi"
 
 
-class LocalidadViewSet(BulkUpsertMixin, BaseViewSet):
+class LocalidadViewSet(BulkCreateMixin, BaseViewSet):
     queryset = Localidad.objects.all()
     serializer_class = LocalidadSerializer
-    search_fields = ['loc_nomb', 'pci_codi__pci_nomb']
-    filterset_fields = ['pci_codi']
-    ordering = ['pci_codi', 'loc_nomb']
+    lookup_field_name = "loc_codi"
 
-    lookup_field = "loc_codi"
-    fields_map = {
-        "loc_nomb": "loc_nomb",
-        "loc_cpos": "loc_cpos",
-        "pci_codi_id": "pci_codi"
-    }
 
-    def create(self, request, *args, **kwargs):
-        return self.bulk_upsert(request)
+# ================================================================
+# CONFIG
+# ================================================================
+class CondicionIvaViewSet(BulkCreateMixin, BaseViewSet):
+    queryset = CondicionIva.objects.all()
+    serializer_class = CondicionIvaSerializer
+    lookup_field_name = "civ_codi"
+
+    @action(detail=False, methods=['get'])
+    def frontend(self, request):
+        serializer = CondicionIvaFrontendSerializer(self.get_queryset(), many=True)
+        return Response(serializer.data)
 
 
 # ================================================================
 # CATÁLOGO
 # ================================================================
-class RubroViewSet(BulkUpsertMixin, BaseViewSet):
-    queryset = Rubro.objects.all()
-    serializer_class = RubroSerializer
-    search_fields = ['rub_nomb']
-    ordering = ['rub_nomb']
-
-    lookup_field = "rub_codi"
-    fields_map = {
-        "rub_nomb": "rub_nomb"
-    }
-
-    def create(self, request, *args, **kwargs):
-        return self.bulk_upsert(request)
-
-
-class SubrubroViewSet(BulkUpsertMixin, BaseViewSet):
-    queryset = Subrubro.objects.all()
-    serializer_class = SubrubroSerializer
-    search_fields = ['sru_nomb']
-    ordering = ['sru_nomb']
-
-    lookup_field = "sru_codi"
-    fields_map = {
-        "sru_nomb": "sru_nomb",
-        "rub_codi_id": "rub_codi"
-    }
-
-    def create(self, request, *args, **kwargs):
-        return self.bulk_upsert(request)
-
-
-class MarcaViewSet(BaseViewSet):
+class MarcaViewSet(BulkCreateMixin, BaseViewSet):
     queryset = Marca.objects.all()
     serializer_class = MarcaSerializer
-    search_fields = ['mar_nomb']
-    ordering = ['mar_nomb']
+    lookup_field_name = "mar_codi"
 
 
-class ColorViewSet(BaseViewSet):
+class RubroViewSet(BulkCreateMixin, BaseViewSet):
+    queryset = Rubro.objects.all()
+    serializer_class = RubroSerializer
+    lookup_field_name = "rub_codi"
+
+
+class SubrubroViewSet(BulkCreateMixin, BaseViewSet):
+    queryset = Subrubro.objects.all()
+    serializer_class = SubrubroSerializer
+    lookup_field_name = "sru_codi"
+
+
+class ColorViewSet(BulkCreateMixin, BaseViewSet):
     queryset = Color.objects.all()
     serializer_class = ColorSerializer
-    search_fields = ['col_nomb']
-    ordering = ['col_nomb']
+    lookup_field_name = "col_codi"
 
 
-class ComprobanteViewSet(BaseViewSet):
+class ComprobanteViewSet(BulkCreateMixin, BaseViewSet):
     queryset = Comprobante.objects.all()
     serializer_class = ComprobanteSerializer
-    ordering = ['com_codi']
+    lookup_field_name = "com_codi"
 
 
-class CondicionIvaViewSet(BaseViewSet):
-    queryset = CondicionIva.objects.all()
-    serializer_class = CondicionIvaSerializer
-    ordering = ['civ_nomb']
-
-
-class ArticuloViewSet(BaseViewSet):
+class ArticuloViewSet(BulkCreateMixin, BaseViewSet):
     queryset = Articulos.objects.all()
     serializer_class = ArticuloSerializer
-    search_fields = ['art_nomb']
-    ordering = ['art_nomb']
+    lookup_field_name = "art_codi"
+
+
+# ================================================================
+# INVENTARIO
+# ================================================================
+class StockViewSet(BulkCreateMixin, BaseViewSet):
+    queryset = Stock.objects.all()
+    serializer_class = StockSerializer
+    lookup_field_name = "stk_codi"
+
+
+class ConfirmacionVentaViewSet(BulkCreateMixin, BaseViewSet):
+    queryset = ConfirmacionVenta.objects.all()
+    serializer_class = ConfirmacionVentaSerializer
+    lookup_field_name = "con_codi"
 
 
 # ================================================================
 # PERSONAS
 # ================================================================
-class RevendedorViewSet(BaseViewSet):
+class RevendedorViewSet(BulkCreateMixin, BaseViewSet):
     queryset = Revendedor.objects.all()
     serializer_class = RevendedorSerializer
-    search_fields = ['rev_nomb']
+    lookup_field_name = "rev_codi"
 
     @action(detail=False, methods=['post'])
     def login(self, request):
         clave = request.data.get('clave')
 
         if not clave:
-            return Response({'error': 'Contraseña requerida'}, status=400)
+            return Response({'error': 'Clave requerida'}, status=400)
 
-        for rev in Revendedor.objects.filter(rev_actv=True):
-            if rev.rev_clav and check_password(clave, rev.rev_clav):
+        for r in Revendedor.objects.filter(rev_actv=True):
+            if r.rev_clav and check_password(clave, r.rev_clav):
                 return Response({
                     "success": True,
-                    "id": rev.rev_codi,
-                    "nombre": rev.rev_nomb
+                    "revendedor": {
+                        "id": r.rev_codi,
+                        "nombre": r.rev_nomb
+                    }
                 })
 
-        return Response({'error': 'Incorrecto'}, status=401)
+        return Response({'success': False}, status=401)
 
 
-class ClientesViewSet(BaseViewSet):
+class ClientesViewSet(BulkCreateMixin, BaseViewSet):
     queryset = Clientes.objects.all()
     serializer_class = ClientesSerializer
+    lookup_field_name = "cli_codi"
 
 
 # ================================================================
 # PEDIDOS
 # ================================================================
-class PedidosViewSet(BaseViewSet):
+class PedidosViewSet(BulkCreateMixin, BaseViewSet):
     queryset = Pedidos.objects.all()
     serializer_class = PedidosSerializer
 
-    @action(detail=True, methods=['get'])
-    def completo(self, request, pk=None):
-        pedido = self.get_object()
-        return Response(PedidosCompletoSerializer(pedido).data)
-
 
 # ================================================================
-# INVENTARIO
-# ================================================================
-class StockViewSet(BaseViewSet):
-    queryset = Stock.objects.all()
-    serializer_class = StockSerializer
-
-
-class ConfirmacionVentaViewSet(BaseViewSet):
-    queryset = ConfirmacionVenta.objects.all()
-    serializer_class = ConfirmacionVentaSerializer
-
-
-# ================================================================
-# CONFIG
+# CONFIG FINAL
 # ================================================================
 class UsuarioViewSet(BaseViewSet):
     queryset = Usuario.objects.all()
@@ -270,22 +215,37 @@ class GeneralViewSet(BaseViewSet):
 
 
 # ================================================================
-# UPLOAD LOGO (FUNCIONAL)
+# LOGOS (⚠️ PARA QUE NO ROMPA IMPORT)
 # ================================================================
 @api_view(['POST'])
 @parser_classes((MultiPartParser, FormParser))
 def upload_revendedor_logo(request, pk):
     try:
-        rev = Revendedor.objects.get(rev_codi=pk)
+        r = Revendedor.objects.get(rev_codi=pk)
     except Revendedor.DoesNotExist:
-        return Response({'error': 'No encontrado'}, status=404)
+        return Response({'error': 'No existe'}, status=404)
 
     archivo = request.FILES.get('archivo')
 
     if not archivo:
         return Response({'error': 'Archivo requerido'}, status=400)
 
-    rev.rev_logo = archivo
-    rev.save()
+    r.rev_logo = archivo
+    r.save()
 
-    return Response({"ok": True})
+    return Response({'ok': True})
+
+
+@api_view(['DELETE'])
+def delete_revendedor_logo(request, pk):
+    try:
+        r = Revendedor.objects.get(rev_codi=pk)
+    except Revendedor.DoesNotExist:
+        return Response({'error': 'No existe'}, status=404)
+
+    if r.rev_logo:
+        r.rev_logo.delete()
+        r.rev_logo = None
+        r.save()
+
+    return Response({'ok': True})
