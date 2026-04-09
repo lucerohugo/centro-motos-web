@@ -48,7 +48,7 @@ class MarcaSerializer(serializers.ModelSerializer):
 class RubroSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rubro
-        fields = ['rub_codi', 'rub_nomb', 'mar_codi']
+        fields = ['rub_codi', 'rub_nomb']
 
 
 class SubrubroSerializer(serializers.ModelSerializer):

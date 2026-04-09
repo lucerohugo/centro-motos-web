@@ -27,7 +27,6 @@ export interface Marca {
 export interface Rubro {
   rub_codi: number
   rub_nomb: string
-  mar_codi: number
 }
 
 export interface Subrubro {

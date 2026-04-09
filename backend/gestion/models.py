@@ -42,12 +42,11 @@ class Rubro(models.Model):
     """Rubros/Categorías de artículos"""
     rub_codi = models.IntegerField(primary_key=True, editable=True)
     rub_nomb = models.CharField(max_length=100, unique=True)
-    mar_codi = models.ForeignKey(Marca, on_delete=models.PROTECT, related_name="rubros")
 
     class Meta:
         verbose_name = "Rubro"
         verbose_name_plural = "Rubros"
-        ordering = ["mar_codi_id", "rub_nomb"]
+        ordering = ["rub_nomb"]
 
     def __str__(self):
         return f"{self.rub_nomb} ({self.mar_codi.mar_nomb})"

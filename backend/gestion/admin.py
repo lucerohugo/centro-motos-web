@@ -54,10 +54,9 @@ class MarcaAdmin(admin.ModelAdmin):
 
 @admin.register(Rubro)
 class RubroAdmin(admin.ModelAdmin):
-    list_display = ['rub_codi', 'rub_nomb', 'mar_codi']
-    list_filter = ['mar_codi']
+    list_display = ['rub_codi', 'rub_nomb']
     search_fields = ['rub_nomb']
-    ordering = ['mar_codi', 'rub_nomb']
+    ordering = ['rub_nomb']
 
 
 @admin.register(Subrubro)
