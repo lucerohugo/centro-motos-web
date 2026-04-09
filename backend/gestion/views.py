@@ -31,10 +31,10 @@ class BaseViewSet(viewsets.ModelViewSet):
 
 
 # ================================================================
-# MIXIN GENÉRICO PARA IMPORT MASIVO (🔥 CLAVE)
+# 🔥 MIXIN BULK CREATE (FIX FK)
 # ================================================================
 class BulkCreateMixin:
-    lookup_field_name = None  # ej: 'rub_codi'
+    lookup_field_name = None
 
     def create(self, request, *args, **kwargs):
         data = request.data
@@ -46,30 +46,36 @@ class BulkCreateMixin:
 
         for item in data:
             try:
-                with transaction.atomic():
-                    lookup = {self.lookup_field_name: item.get(self.lookup_field_name)}
-
-                    obj, created = self.queryset.model.objects.update_or_create(
-                        **lookup,
-                        defaults=item
-                    )
-
+                if not item.get(self.lookup_field_name):
                     resultados.append({
-                        "id": getattr(obj, self.lookup_field_name),
-                        "created": created
+                        "error": f"Falta campo {self.lookup_field_name}",
+                        "data": item
                     })
+                    continue
 
-            except IntegrityError as e:
+                model = self.queryset.model
+                data_item = item.copy()
+
+                # 🔥 FIX CLAVE: convertir FK a *_id
+                for field in model._meta.fields:
+                    if field.is_relation and field.many_to_one:
+                        fk_name = field.name  # ej: pci_codi
+                        if fk_name in data_item:
+                            data_item[f"{fk_name}_id"] = data_item.pop(fk_name)
+
+                obj, created = model.objects.update_or_create(
+                    **{self.lookup_field_name: data_item[self.lookup_field_name]},
+                    defaults=data_item
+                )
+
                 resultados.append({
-                    "error": "IntegrityError",
-                    "detalle": str(e),
-                    "data": item
+                    "id": getattr(obj, self.lookup_field_name),
+                    "created": created
                 })
 
             except Exception as e:
                 resultados.append({
-                    "error": "Exception",
-                    "detalle": str(e),
+                    "error": str(e),
                     "data": item
                 })
 
@@ -215,7 +221,7 @@ class GeneralViewSet(BaseViewSet):
 
 
 # ================================================================
-# LOGOS (⚠️ PARA QUE NO ROMPA IMPORT)
+# LOGOS
 # ================================================================
 @api_view(['POST'])
 @parser_classes((MultiPartParser, FormParser))
