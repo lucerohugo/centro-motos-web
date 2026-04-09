@@ -49,7 +49,7 @@ class Rubro(models.Model):
         ordering = ["rub_nomb"]
 
     def __str__(self):
-        return f"{self.rub_nomb} ({self.mar_codi.mar_nomb})"
+        return self.rub_nomb
 
 
 # ================================================================
