@@ -54,7 +54,7 @@ class RubroSerializer(serializers.ModelSerializer):
 class SubrubroSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subrubro
-        fields = ['sru_codi', 'sru_nomb']
+        fields = ['sru_codi', 'sru_nomb', 'rub_codi']
 
 
 class ColorSerializer(serializers.ModelSerializer):
