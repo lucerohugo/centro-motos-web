@@ -164,35 +164,77 @@ class RubroViewSet(BaseViewSet):
     queryset = Rubro.objects.all()
     serializer_class = RubroSerializer
     search_fields = ['rub_nomb']
-    filterset_fields = ['mar_codi']
-    ordering = ['mar_codi', 'rub_nomb']
+    ordering = ['rub_nomb']
+
+    def create(self, request, *args, **kwargs):
+        data = request.data
+
+        if not isinstance(data, list):
+            data = [data]
+
+        resultados = []
+
+        for item in data:
+            try:
+                obj, created = Rubro.objects.update_or_create(
+                    rub_codi=item.get("rub_codi"),
+                    defaults={
+                        "rub_nomb": item.get("rub_nomb")
+                    }
+                )
+
+                resultados.append({
+                    "rub_codi": obj.rub_codi,
+                    "rub_nomb": obj.rub_nomb,
+                    "created": created
+                })
+
+            except Exception as e:
+                resultados.append({
+                    "error": str(e),
+                    "data": item
+                })
+
+        return Response(resultados, status=status.HTTP_200_OK)
 
 
 class SubrubroViewSet(BaseViewSet):
     queryset = Subrubro.objects.all()
     serializer_class = SubrubroSerializer
     search_fields = ['sru_nomb']
-
-    @action(detail=False, methods=['get'])
-    def por_destino(self, request):
-        """Retorna subrubros cuyos artículos están disponibles en un destino específico"""
-        art_dest = request.query_params.get('art_dest')
-        if not art_dest:
-            return Response({'error': 'Parámetro art_dest requerido'}, status=400)
-        
-        try:
-            art_dest = int(art_dest)
-        except ValueError:
-            return Response({'error': 'art_dest debe ser un número válido'}, status=400)
-        
-        # Obtener subrubros únicos de artículos en stock del destino
-        subrubros = Subrubro.objects.filter(
-            articulos__stock__art_dest=art_dest
-        ).distinct().order_by('sru_nomb')
-        
-        serializer = self.get_serializer(subrubros, many=True)
-        return Response(serializer.data)
     ordering = ['sru_nomb']
+
+    def create(self, request, *args, **kwargs):
+        data = request.data
+
+        if not isinstance(data, list):
+            data = [data]
+
+        resultados = []
+
+        for item in data:
+            try:
+                obj, created = Subrubro.objects.update_or_create(
+                    sru_codi=item.get("sru_codi"),
+                    defaults={
+                        "sru_nomb": item.get("sru_nomb"),
+                        "rub_codi_id": item.get("rub_codi")
+                    }
+                )
+
+                resultados.append({
+                    "sru_codi": obj.sru_codi,
+                    "sru_nomb": obj.sru_nomb,
+                    "created": created
+                })
+
+            except Exception as e:
+                resultados.append({
+                    "error": str(e),
+                    "data": item
+                })
+
+        return Response(resultados, status=status.HTTP_200_OK)
 
 
 class ColorViewSet(BaseViewSet):
