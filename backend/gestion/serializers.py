@@ -86,8 +86,8 @@ class ArticuloStockSerializer(serializers.ModelSerializer):
 
 
 class ArticuloSerializer(serializers.ModelSerializer):
-    mar_nomb = serializers.CharField(source='mar_codi.mar_nomb', read_only=True, allow_null=True)
-    rub_nomb = serializers.CharField(source='rub_codi.rub_nomb', read_only=True, allow_null=True)
+    mar_nomb = serializers.CharField(source='mar_codi.mar_nomb', read_only=True)
+    rub_nomb = serializers.CharField(source='rub_codi.rub_nomb', read_only=True)
     sru_nomb = serializers.CharField(source='sru_codi.sru_nomb', read_only=True, allow_null=True)
 
     class Meta:

@@ -181,8 +181,7 @@ class Articulos(models.Model):
         ordering = ["art_nomb"]
 
     def __str__(self):
-        marca = self.mar_codi.mar_nomb if self.mar_codi else "Sin marca"
-        return f"{self.art_nomb} - {marca}"
+        return f"{self.art_nomb} - {self.mar_codi.mar_nomb}"
 
 
 # ================================================================
