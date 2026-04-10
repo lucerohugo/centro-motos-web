@@ -89,7 +89,6 @@ class ArticuloSerializer(serializers.ModelSerializer):
     mar_nomb = serializers.CharField(source='mar_codi.mar_nomb', read_only=True)
     rub_nomb = serializers.CharField(source='rub_codi.rub_nomb', read_only=True)
     sru_nomb = serializers.CharField(source='sru_codi.sru_nomb', read_only=True, allow_null=True)
-    art_tiva_nomb = serializers.CharField(source='art_tiva.civ_nomb', read_only=True, allow_null=True)
 
     class Meta:
         model = Articulos
@@ -97,7 +96,7 @@ class ArticuloSerializer(serializers.ModelSerializer):
             'art_codi', 'art_nomb', 'art_mode',
             'art_plis', 'art_prec', 'art_tprec',
             'mar_codi', 'mar_nomb', 'rub_codi', 'rub_nomb', 'sru_codi', 'sru_nomb', 
-            'art_tiva', 'art_tiva_nomb',
+            'art_tiva',
             'art_fchc', 'art_fmod'
         ]
         read_only_fields = ['art_fchc', 'art_fmod']
