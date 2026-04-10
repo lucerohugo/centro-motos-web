@@ -163,7 +163,7 @@ class Articulos(models.Model):
     sru_codi = models.ForeignKey(Subrubro, on_delete=models.SET_NULL, null=True, blank=True, related_name="articulos")
     
     # IVA
-    art_tiva = models.ForeignKey(CondicionIva, on_delete=models.SET_NULL, null=True, blank=True, related_name="articulos")
+    art_tiva = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     
     # Precios y stock
     art_plis = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True, help_text="Precio de lista")
