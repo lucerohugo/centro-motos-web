@@ -138,9 +138,9 @@ class ConfirmacionVentaSerializer(serializers.ModelSerializer):
             'con_codi', 'con_marc', 'mar_nomb', 'con_rubr', 'rub_nomb',
             'con_suru', 'sru_nomb', 'con_arti', 'art_nomb',
             'con_reve', 'rev_nomb', 'con_prec', 'con_porc',
-            'con_fchc', 'con_fmod'
+            
         ]
-        read_only_fields = ['con_codi', 'con_fchc', 'con_fmod']
+        read_only_fields = ['con_codi']
 
 
 # ================================================================
