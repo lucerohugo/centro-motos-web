@@ -205,6 +205,9 @@ class ClientesViewSet(BulkCreateMixin, BaseViewSet):
 class PedidosViewSet(BulkCreateMixin, BaseViewSet):
     queryset = Pedidos.objects.all()
     serializer_class = PedidosSerializer
+    filterset_fields = ['rev_codi']
+    ordering_fields = ['pov_codi', 'pov_fech', '-pov_codi']
+    ordering = ['-pov_codi']
 
 
 # ================================================================
