@@ -159,7 +159,6 @@ class Articulos(models.Model):
     
     # Categorización
     mar_codi = models.ForeignKey(Marca, on_delete=models.SET_NULL, null=True, blank=True, related_name="articulos")
-    rub_codi = models.ForeignKey(Rubro, on_delete=models.SET_NULL, null=True, blank=True, related_name="articulos")
     sru_codi = models.ForeignKey(Subrubro, on_delete=models.SET_NULL, null=True, blank=True, related_name="articulos")
     
     # IVA

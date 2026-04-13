@@ -87,15 +87,15 @@ class ArticuloStockSerializer(serializers.ModelSerializer):
 
 class ArticuloSerializer(serializers.ModelSerializer):
     mar_nomb = serializers.CharField(source='mar_codi.mar_nomb', read_only=True)
-    rub_nomb = serializers.CharField(source='rub_codi.rub_nomb', read_only=True)
     sru_nomb = serializers.CharField(source='sru_codi.sru_nomb', read_only=True, allow_null=True)
+    rub_nomb = serializers.CharField(source='sru_codi.rub_codi.rub_nomb', read_only=True, allow_null=True)
 
     class Meta:
         model = Articulos
         fields = [
             'art_codi', 'art_nomb', 'art_mode',
             'art_plis', 'art_prec', 'art_tprec',
-            'mar_codi', 'mar_nomb', 'rub_codi', 'rub_nomb', 'sru_codi', 'sru_nomb', 
+            'mar_codi', 'mar_nomb', 'sru_codi', 'sru_nomb', 'rub_nomb',
             'art_tiva',
             'art_fchc', 'art_fmod'
         ]

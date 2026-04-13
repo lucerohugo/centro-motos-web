@@ -83,8 +83,8 @@ class ComprobanteAdmin(admin.ModelAdmin):
 
 @admin.register(Articulos)
 class ArticulosAdmin(admin.ModelAdmin):
-    list_display = ['art_codi', 'art_nomb', 'art_mode', 'art_plis', 'art_prec', 'mar_codi', 'rub_codi']
-    list_filter = ['mar_codi', 'rub_codi', 'sru_codi']
+    list_display = ['art_codi', 'art_nomb', 'art_mode', 'art_plis', 'art_prec', 'mar_codi', 'sru_codi']
+    list_filter = ['mar_codi', 'sru_codi']
     search_fields = ['art_nomb', 'art_codi', 'art_mode']
     readonly_fields = ['art_fchc', 'art_fmod']
     fieldsets = (
@@ -95,7 +95,7 @@ class ArticulosAdmin(admin.ModelAdmin):
             'fields': ('art_plis', 'art_prec', 'art_tprec')
         }),
         ('Clasificación', {
-            'fields': ('mar_codi', 'rub_codi', 'sru_codi', 'art_tiva')
+            'fields': ('mar_codi', 'sru_codi', 'art_tiva')
         }),
         ('Control', {
             'fields': ('art_fchc', 'art_fmod')
