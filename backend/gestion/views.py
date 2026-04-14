@@ -154,22 +154,19 @@ class ArticuloViewSet(BulkCreateMixin, BaseViewSet):
 # INVENTARIO
 # ================================================================
 class StockViewSet(BulkCreateMixin, BaseViewSet):
-    queryset = Stock.objects.all().select_related('art_codi', 'col_codi')
+    queryset = Stock.objects.all()
     serializer_class = StockSerializer
     lookup_field_name = "stk_codi"
     
     # Filtros habilitados
     filterset_fields = ['art_dest', 'art_codi__mar_codi', 'art_codi__sru_codi', 'col_codi']
     
-    # Búsqueda por múltiples campos (Icontains)
-    search_fields = ['art_codi__art_nomb', 'art_ncha', 'art_nmot', 'art_ncer', 'art_codi__art_codi']
+    # Búsqueda por múltiples campos
+    search_fields = ['art_nomb', 'art_ncha', 'art_nmot', 'art_ncer']
     
     # Ordenamiento
     ordering_fields = ['stk_codi', 'art_fing', 'art_mode']
     ordering = ['stk_codi']
-    
-    # Sin paginación para stock (traer todo)
-    pagination_class = None
     
     # Sin paginación para stock (traer todo)
     pagination_class = None
