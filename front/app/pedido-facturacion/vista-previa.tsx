@@ -44,8 +44,10 @@ export function VistaPrevia({
       const raw = sessionStorage.getItem('revendedor_login')
       if (raw) {
         const data = JSON.parse(raw)
-        if (data.rev_logo_url) {
-          setLogoRevendedor(data.rev_logo_url)
+        // El nuevo login anida los datos en data.revendedor
+        const logo = data.revendedor?.rev_logo_url || data.rev_logo_url
+        if (logo) {
+          setLogoRevendedor(logo)
         }
       }
     } catch {
@@ -68,11 +70,20 @@ export function VistaPrevia({
   const imageUrlToBase64 = async (url: string): Promise<string> => {
     try {
       let finalUrl = url
-      if (url.startsWith('/')) {
-        const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-        finalUrl = `${API_BASE}${url}`
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+      const baseUrl = API_BASE.endsWith('/') ? API_BASE.slice(0, -1) : API_BASE
+
+      if (!url.startsWith('http')) {
+        const cleanPath = url.startsWith('/') ? url : `/${url}`
+        finalUrl = `${baseUrl}${cleanPath}`
       }
+      
+      console.log("Intentando convertir URL de logo a Base64:", finalUrl)
       const response = await fetch(finalUrl, { mode: 'cors' })
+      if (!response.ok) {
+        console.warn(`No se pudo descargar el logo (${response.status}): ${response.statusText}`)
+        return ''
+      }
       const blob = await response.blob()
       return new Promise((resolve) => {
         const reader = new FileReader()

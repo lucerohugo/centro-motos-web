@@ -351,29 +351,43 @@ export async function generarPDFPedidoGuardado(
       // Silenciar error
     }
 
-    // Convertir logo a base64 (IDÉNTICO a vista-previa.tsx)
+    // Convertir logo a base64
     let logoBase64 = ''
     try {
       const raw = typeof window !== 'undefined' ? sessionStorage.getItem('revendedor_login') : null
       if (raw) {
         const data = JSON.parse(raw)
+        console.log("Datos de login recuperados para PDF:", data)
+        
         // Intentar obtener de revendedor.rev_logo_url (nuevo formato) o rev_logo_url (viejo)
         let logoUrl = data.revendedor?.rev_logo_url || data.rev_logo_url
         
         if (logoUrl) {
+          console.log("URL de logo encontrada:", logoUrl)
+          
           // Asegurar que la URL sea absoluta
-          if (logoUrl.startsWith('/')) {
-            const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-            logoUrl = `${API_BASE}${logoUrl}`
+          if (!logoUrl.startsWith('http')) {
+            // Si es relativa, la concatenamos con API_BASE_URL (definida al inicio del archivo)
+            const baseUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL
+            const cleanPath = logoUrl.startsWith('/') ? logoUrl : `/${logoUrl}`
+            logoUrl = `${baseUrl}${cleanPath}`
+            console.log("URL de logo convertida a absoluta:", logoUrl)
           }
 
           const logoResponse = await fetch(logoUrl, { mode: 'cors' })
-          const blob = await logoResponse.blob()
-          logoBase64 = await new Promise<string>((resolve) => {
-            const reader = new FileReader()
-            reader.onloadend = () => resolve(reader.result as string)
-            reader.readAsDataURL(blob)
-          })
+          if (logoResponse.ok) {
+            const blob = await logoResponse.blob()
+            logoBase64 = await new Promise<string>((resolve) => {
+              const reader = new FileReader()
+              reader.onloadend = () => resolve(reader.result as string)
+              reader.readAsDataURL(blob)
+            })
+            console.log("Logo convertido a Base64 exitosamente")
+          } else {
+            console.warn(`No se pudo descargar el logo (${logoResponse.status}): ${logoResponse.statusText}`)
+          }
+        } else {
+          console.warn("No se encontró URL de logo en los datos del revendedor")
         }
       }
     } catch (err) {
