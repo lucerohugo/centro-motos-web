@@ -157,6 +157,19 @@ class StockViewSet(BulkCreateMixin, BaseViewSet):
     queryset = Stock.objects.all()
     serializer_class = StockSerializer
     lookup_field_name = "stk_codi"
+    
+    # Filtros habilitados
+    filterset_fields = ['art_dest', 'art_codi__mar_codi', 'art_codi__sru_codi', 'col_codi']
+    
+    # Búsqueda por múltiples campos
+    search_fields = ['art_nomb', 'art_ncha', 'art_nmot', 'art_ncer']
+    
+    # Ordenamiento
+    ordering_fields = ['stk_codi', 'art_fing', 'art_mode']
+    ordering = ['stk_codi']
+    
+    # Sin paginación para stock (traer todo)
+    pagination_class = None
 
 
 class ConfirmacionVentaViewSet(BulkCreateMixin, BaseViewSet):
