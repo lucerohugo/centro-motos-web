@@ -210,6 +210,24 @@ class StockViewSet(BulkCreateMixin, BaseViewSet):
     
     # Sin paginación para stock (traer todo)
     pagination_class = None
+    
+    def list(self, request, *args, **kwargs):
+        """Override list para requerir art_dest"""
+        art_dest = request.query_params.get('art_dest')
+        
+        # Si no hay art_dest, devolver array vacío
+        if not art_dest:
+            return Response([], status=status.HTTP_200_OK)
+        
+        try:
+            art_dest_int = int(art_dest)
+            if art_dest_int <= 0:
+                return Response([], status=status.HTTP_200_OK)
+        except (ValueError, TypeError):
+            return Response([], status=status.HTTP_200_OK)
+        
+        # Si llegamos aquí, hay un art_dest válido, proceder normalmente
+        return super().list(request, *args, **kwargs)
 
 
 class ConfirmacionVentaViewSet(BulkCreateMixin, BaseViewSet):

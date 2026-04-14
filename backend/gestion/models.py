@@ -196,7 +196,7 @@ class Revendedor(models.Model):
     rev_emai = models.EmailField(blank=True, null=True)
     rev_tele = models.CharField(max_length=20, blank=True, help_text="Teléfono")
     rev_dire = models.CharField(max_length=200, blank=True, null=True, help_text="Dirección")
-    rev_dest = models.CharField(max_length=50, blank=True, null=True, help_text="Depósito asignado")
+    rev_dest = models.IntegerField(blank=True, null=True, help_text="Depósito asignado (art_dest)")
     rev_porc = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True, help_text="Porcentaje/Comisión")
     rev_clav = models.CharField(max_length=128, blank=True, null=True, help_text="Contraseña/Clave (hasheada)")
     rev_actv = models.BooleanField(default=True, help_text="Activo")
