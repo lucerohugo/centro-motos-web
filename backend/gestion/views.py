@@ -261,11 +261,19 @@ class RevendedorViewSet(BulkCreateMixin, BaseViewSet):
 
         for r in Revendedor.objects.filter(rev_actv=True):
             if r.rev_clav and check_password(clave, r.rev_clav):
+                # Usar el serializer para obtener todos los datos incluyendo rev_logo_url
+                serializer = RevendedorSerializer(r, context={'request': request})
                 return Response({
                     "success": True,
                     "revendedor": {
                         "id": r.rev_codi,
-                        "nombre": r.rev_nomb
+                        "nombre": r.rev_nomb,
+                        "destino": r.rev_dest or 0,
+                        "direccion": r.rev_dire or "",
+                        "telefono": r.rev_tele or "",
+                        "celular": "",
+                        "email": r.rev_emai or "",
+                        "rev_logo_url": serializer.data.get('rev_logo_url')
                     }
                 })
 
