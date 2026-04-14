@@ -5,7 +5,6 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.parsers import MultiPartParser, FormParser
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db import IntegrityError, transaction
-from django.db.models import Q, Distinct
 
 from django.contrib.auth.hashers import check_password
 
@@ -119,22 +118,6 @@ class MarcaViewSet(BulkCreateMixin, BaseViewSet):
     queryset = Marca.objects.all()
     serializer_class = MarcaSerializer
     lookup_field_name = "mar_codi"
-    
-    @action(detail=False, methods=['get'], url_path='por_destino')
-    def por_destino(self, request):
-        """Retorna marcas que tienen stock en un destino específico"""
-        art_dest = request.query_params.get('art_dest')
-        
-        if not art_dest:
-            return Response([], status=status.HTTP_200_OK)
-        
-        # Obtener marcas que existen en el stock de ese depósito
-        marcas = Marca.objects.filter(
-            articulos__stock__art_dest=art_dest
-        ).distinct().order_by('mar_nomb')
-        
-        serializer = self.get_serializer(marcas, many=True)
-        return Response(serializer.data)
 
 
 class RubroViewSet(BulkCreateMixin, BaseViewSet):
@@ -147,22 +130,6 @@ class SubrubroViewSet(BulkCreateMixin, BaseViewSet):
     queryset = Subrubro.objects.all()
     serializer_class = SubrubroSerializer
     lookup_field_name = "sru_codi"
-    
-    @action(detail=False, methods=['get'], url_path='por_destino')
-    def por_destino(self, request):
-        """Retorna subrubros que tienen stock en un destino específico"""
-        art_dest = request.query_params.get('art_dest')
-        
-        if not art_dest:
-            return Response([], status=status.HTTP_200_OK)
-        
-        # Obtener subrubros que existen en el stock de ese depósito
-        subrubros = Subrubro.objects.filter(
-            articulos__stock__art_dest=art_dest
-        ).distinct().order_by('sru_nomb')
-        
-        serializer = self.get_serializer(subrubros, many=True)
-        return Response(serializer.data)
 
 
 class ColorViewSet(BulkCreateMixin, BaseViewSet):
@@ -187,18 +154,15 @@ class ArticuloViewSet(BulkCreateMixin, BaseViewSet):
 # INVENTARIO
 # ================================================================
 class StockViewSet(BulkCreateMixin, BaseViewSet):
-    queryset = Stock.objects.all().select_related('art_codi', 'col_codi')
+    queryset = Stock.objects.all()
     serializer_class = StockSerializer
     lookup_field_name = "stk_codi"
     
-    # Filtros por campos exactos
+    # Filtros habilitados
     filterset_fields = ['art_dest', 'art_codi__mar_codi', 'art_codi__sru_codi', 'col_codi']
     
     # Búsqueda por múltiples campos
-    search_fields = ['art_nomb', 'art_ncha', 'art_nmot', 'art_ncer', 'art_codi__art_codi']
-    
-    # Configurar los filter backends en el orden correcto
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['art_nomb', 'art_ncha', 'art_nmot', 'art_ncer']
     
     # Ordenamiento
     ordering_fields = ['stk_codi', 'art_fing', 'art_mode']
