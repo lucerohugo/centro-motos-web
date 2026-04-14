@@ -118,6 +118,26 @@ class MarcaViewSet(BulkCreateMixin, BaseViewSet):
     queryset = Marca.objects.all()
     serializer_class = MarcaSerializer
     lookup_field_name = "mar_codi"
+    
+    @action(detail=False, methods=['get'], url_path='por_destino')
+    def por_destino(self, request):
+        """GET /marcas/por_destino/?art_dest=1 - Retorna marcas con stock en ese depósito"""
+        art_dest = request.query_params.get('art_dest')
+        if not art_dest:
+            return Response([], status=status.HTTP_200_OK)
+        
+        try:
+            art_dest = int(art_dest)
+        except (ValueError, TypeError):
+            return Response([], status=status.HTTP_200_OK)
+        
+        # Marcas que tienen artículos con stock en ese destino
+        marcas = Marca.objects.filter(
+            articulos__stock__art_dest=art_dest
+        ).distinct().order_by('mar_nomb')
+        
+        serializer = self.get_serializer(marcas, many=True)
+        return Response(serializer.data)
 
 
 class RubroViewSet(BulkCreateMixin, BaseViewSet):
@@ -130,6 +150,26 @@ class SubrubroViewSet(BulkCreateMixin, BaseViewSet):
     queryset = Subrubro.objects.all()
     serializer_class = SubrubroSerializer
     lookup_field_name = "sru_codi"
+    
+    @action(detail=False, methods=['get'], url_path='por_destino')
+    def por_destino(self, request):
+        """GET /subrubros/por_destino/?art_dest=1 - Retorna subrubros con stock en ese depósito"""
+        art_dest = request.query_params.get('art_dest')
+        if not art_dest:
+            return Response([], status=status.HTTP_200_OK)
+        
+        try:
+            art_dest = int(art_dest)
+        except (ValueError, TypeError):
+            return Response([], status=status.HTTP_200_OK)
+        
+        # Subrubros que tienen artículos con stock en ese destino
+        subrubros = Subrubro.objects.filter(
+            articulos__stock__art_dest=art_dest
+        ).distinct().order_by('sru_nomb')
+        
+        serializer = self.get_serializer(subrubros, many=True)
+        return Response(serializer.data)
 
 
 class ColorViewSet(BulkCreateMixin, BaseViewSet):
@@ -154,15 +194,15 @@ class ArticuloViewSet(BulkCreateMixin, BaseViewSet):
 # INVENTARIO
 # ================================================================
 class StockViewSet(BulkCreateMixin, BaseViewSet):
-    queryset = Stock.objects.all()
+    queryset = Stock.objects.all().select_related('art_codi', 'col_codi')
     serializer_class = StockSerializer
     lookup_field_name = "stk_codi"
     
     # Filtros habilitados
     filterset_fields = ['art_dest', 'art_codi__mar_codi', 'art_codi__sru_codi', 'col_codi']
     
-    # Búsqueda por múltiples campos
-    search_fields = ['art_nomb', 'art_ncha', 'art_nmot', 'art_ncer']
+    # Búsqueda por múltiples campos (busca en art_codi relacionado)
+    search_fields = ['art_codi__art_nomb', 'art_ncha', 'art_nmot', 'art_ncer', 'art_codi__art_codi']
     
     # Ordenamiento
     ordering_fields = ['stk_codi', 'art_fing', 'art_mode']
