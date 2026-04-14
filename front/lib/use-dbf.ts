@@ -24,33 +24,12 @@ const API_URL = `${API_BASE_URL}/api/gestion`
 // ================================================================
 
 const fetchAll = async <T,>(endpoint: string): Promise<T[]> => {
-  let allResults: T[] = []
-  let nextUrl: string | null = `${API_URL}${endpoint}`
-
-  try {
-    while (nextUrl) {
-      const response = await fetch(nextUrl)
-      if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`)
-      }
-      const data = await response.json()
-      
-      if (Array.isArray(data)) {
-        allResults = data
-        nextUrl = null
-      } else {
-        allResults = [...allResults, ...(data.results || [])]
-        nextUrl = data.next || null
-      }
-
-      // Seguridad: si no es paginado o no hay más, salir
-      if (!data.next) break
-    }
-    return allResults
-  } catch (error) {
-    console.error("Error en fetchAll:", error)
-    throw error
+  const response = await fetch(`${API_URL}${endpoint}`)
+  if (!response.ok) {
+    throw new Error(`Error ${response.status}: ${response.statusText}`)
   }
+  const data = await response.json()
+  return Array.isArray(data) ? data : data.results ?? []
 }
 
 /* =========================================================

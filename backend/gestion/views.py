@@ -93,6 +93,7 @@ class ProvinciaViewSet(BulkCreateMixin, BaseViewSet):
 
 class LocalidadViewSet(BulkCreateMixin, BaseViewSet):
     queryset = Localidad.objects.all()
+    pagination_class = None
     serializer_class = LocalidadSerializer
     lookup_field_name = "loc_codi"
 
