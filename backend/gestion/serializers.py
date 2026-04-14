@@ -155,10 +155,16 @@ class RevendedorSerializer(serializers.ModelSerializer):
         read_only_fields = ['rev_codi', 'rev_logo_url']
 
     def get_rev_logo_url(self, obj):
+        """Retorna URL completa del logo del revendedor"""
         if obj.rev_logo:
-            request = self.context.get('request')
-            if request:
-                return request.build_absolute_uri(obj.rev_logo.url)
+            try:
+                request = self.context.get('request')
+                if request:
+                    return request.build_absolute_uri(obj.rev_logo.url)
+                # Fallback si no hay request
+                return f"/media/{obj.rev_logo.name}"
+            except Exception:
+                return None
         return None
 
 

@@ -245,6 +245,12 @@ class RevendedorViewSet(BulkCreateMixin, BaseViewSet):
     queryset = Revendedor.objects.all()
     serializer_class = RevendedorSerializer
     lookup_field_name = "rev_codi"
+    
+    def get_serializer_context(self):
+        """Pasar request al contexto del serializer"""
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
 
     @action(detail=False, methods=['post'])
     def login(self, request):
