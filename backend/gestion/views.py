@@ -194,7 +194,6 @@ class ArticuloViewSet(BulkCreateMixin, BaseViewSet):
 # INVENTARIO
 # ================================================================
 class StockViewSet(BulkCreateMixin, BaseViewSet):
-    queryset = Stock.objects.all().select_related('art_codi', 'col_codi')
     serializer_class = StockSerializer
     lookup_field_name = "stk_codi"
     
@@ -211,23 +210,26 @@ class StockViewSet(BulkCreateMixin, BaseViewSet):
     # Sin paginación para stock (traer todo)
     pagination_class = None
     
-    def list(self, request, *args, **kwargs):
-        """Override list para requerir art_dest"""
-        art_dest = request.query_params.get('art_dest')
+    def get_queryset(self):
+        """Solo retorna stock si art_dest es válido y está en query_params"""
+        queryset = Stock.objects.all().select_related('art_codi', 'col_codi')
         
-        # Si no hay art_dest, devolver array vacío
+        # Requerir art_dest en query params
+        art_dest = self.request.query_params.get('art_dest')
+        
         if not art_dest:
-            return Response([], status=status.HTTP_200_OK)
+            # Si no hay art_dest, retorna queryset vacío
+            return queryset.none()
         
         try:
             art_dest_int = int(art_dest)
             if art_dest_int <= 0:
-                return Response([], status=status.HTTP_200_OK)
+                return queryset.none()
         except (ValueError, TypeError):
-            return Response([], status=status.HTTP_200_OK)
+            return queryset.none()
         
-        # Si llegamos aquí, hay un art_dest válido, proceder normalmente
-        return super().list(request, *args, **kwargs)
+        # Filtrar por art_dest directamente
+        return queryset.filter(art_dest=art_dest_int)
 
 
 class ConfirmacionVentaViewSet(BulkCreateMixin, BaseViewSet):
