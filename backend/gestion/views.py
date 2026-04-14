@@ -209,6 +209,19 @@ class PedidosViewSet(BulkCreateMixin, BaseViewSet):
     ordering_fields = ['pov_codi', 'pov_fech', '-pov_codi']
     ordering = ['-pov_codi']
 
+    def create(self, request, *args, **kwargs):
+        """Override create para debuggear datos de entrada"""
+        import sys
+        print(f"\n🔍 DEBUG POST /pedidos/", file=sys.stderr)
+        print(f"Datos recibidos: {request.data}", file=sys.stderr)
+        print(f"rev_codi: {request.data.get('rev_codi')}", file=sys.stderr)
+        
+        # Llamar al create original
+        response = super().create(request, *args, **kwargs)
+        
+        print(f"Pedido creado: {response.data}", file=sys.stderr)
+        return response
+
 
 # ================================================================
 # CONFIG FINAL
