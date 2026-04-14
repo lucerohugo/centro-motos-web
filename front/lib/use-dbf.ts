@@ -365,14 +365,20 @@ export async function generarPDFPedidoGuardado(
         if (logoUrl) {
           console.log("URL de logo encontrada:", logoUrl)
           
-          // Asegurar que la URL sea absoluta
+          // Asegurar que la URL sea absoluta y use HTTPS si es necesario para evitar Mixed Content
           if (!logoUrl.startsWith('http')) {
             // Si es relativa, la concatenamos con API_BASE_URL (definida al inicio del archivo)
             const baseUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL
             const cleanPath = logoUrl.startsWith('/') ? logoUrl : `/${logoUrl}`
             logoUrl = `${baseUrl}${cleanPath}`
-            console.log("URL de logo convertida a absoluta:", logoUrl)
           }
+
+          // Forzar HTTPS para evitar errores de Mixed Content en producción
+          if (logoUrl.startsWith('http://')) {
+            logoUrl = logoUrl.replace('http://', 'https://')
+          }
+          
+          console.log("URL de logo final (forzada HTTPS):", logoUrl)
 
           const logoResponse = await fetch(logoUrl, { mode: 'cors' })
           if (logoResponse.ok) {

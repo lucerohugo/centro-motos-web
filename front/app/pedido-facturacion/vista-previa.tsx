@@ -77,8 +77,13 @@ export function VistaPrevia({
         const cleanPath = url.startsWith('/') ? url : `/${url}`
         finalUrl = `${baseUrl}${cleanPath}`
       }
+
+      // Forzar HTTPS para evitar errores de Mixed Content en producción
+      if (finalUrl.startsWith('http://')) {
+        finalUrl = finalUrl.replace('http://', 'https://')
+      }
       
-      console.log("Intentando convertir URL de logo a Base64:", finalUrl)
+      console.log("Intentando convertir URL de logo a Base64 (HTTPS forzado):", finalUrl)
       const response = await fetch(finalUrl, { mode: 'cors' })
       if (!response.ok) {
         console.warn(`No se pudo descargar el logo (${response.status}): ${response.statusText}`)
