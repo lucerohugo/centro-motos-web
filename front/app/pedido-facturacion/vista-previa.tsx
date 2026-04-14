@@ -429,14 +429,6 @@ export function VistaPrevia({
             </p>
             <div className="flex gap-2">
               <button
-                onClick={handleDescargarPDF}
-                disabled={savingPDF}
-                className="flex items-center gap-2 h-9 rounded-lg border border-border bg-card px-4 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Download className="h-3.5 w-3.5" />
-                {savingPDF ? 'Guardando...' : 'Descargar PDF'}
-              </button>
-              <button
                 onClick={onEditar}
                 className="flex items-center gap-2 h-9 rounded-lg border border-primary bg-primary/10 px-4 text-xs font-medium text-primary hover:bg-primary/20"
               >

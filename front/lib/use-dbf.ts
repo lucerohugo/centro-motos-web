@@ -357,11 +357,13 @@ export async function generarPDFPedidoGuardado(
       const raw = typeof window !== 'undefined' ? sessionStorage.getItem('revendedor_login') : null
       if (raw) {
         const data = JSON.parse(raw)
-        if (data.rev_logo_url) {
-          const logoUrl = data.rev_logo_url
+        // Intentar obtener de revendedor.rev_logo_url (nuevo formato) o rev_logo_url (viejo)
+        const logoUrl = data.revendedor?.rev_logo_url || data.rev_logo_url
+        
+        if (logoUrl) {
           const logoResponse = await fetch(logoUrl)
           const blob = await logoResponse.blob()
-          logoBase64 = await new Promise((resolve) => {
+          logoBase64 = await new Promise<string>((resolve) => {
             const reader = new FileReader()
             reader.onloadend = () => resolve(reader.result as string)
             reader.readAsDataURL(blob)
@@ -369,7 +371,7 @@ export async function generarPDFPedidoGuardado(
         }
       }
     } catch (err) {
-      // Silenciar error
+      console.error("Error al cargar logo para PDF:", err)
     }
 
     // Helpers (IDÉNTICOS a vista-previa.tsx)
