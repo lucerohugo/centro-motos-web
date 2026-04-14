@@ -323,7 +323,9 @@ def upload_revendedor_logo(request, pk):
     r.rev_logo = archivo
     r.save()
 
-    return Response({'ok': True})
+    # Retornar el revendedor serializado con la URL del logo
+    serializer = RevendedorSerializer(r, context={'request': request})
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(['DELETE'])
@@ -338,4 +340,6 @@ def delete_revendedor_logo(request, pk):
         r.rev_logo = None
         r.save()
 
-    return Response({'ok': True})
+    # Retornar el revendedor serializado (sin logo)
+    serializer = RevendedorSerializer(r, context={'request': request})
+    return Response(serializer.data, status=status.HTTP_200_OK)
