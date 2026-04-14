@@ -197,7 +197,8 @@ class ClientesSerializer(serializers.ModelSerializer):
 # ================================================================
 # PEDIDOS
 # ================================================================
-class PedidosSerializer(serializers.ModelSerializer):    rev_codi = serializers.PrimaryKeyRelatedField(queryset=Revendedor.objects.all())    rev_nomb = serializers.CharField(source='rev_codi.rev_nomb', read_only=True)
+class PedidosSerializer(serializers.ModelSerializer):
+    rev_nomb = serializers.CharField(source='rev_codi.rev_nomb', read_only=True)
     art_nomb = serializers.CharField(source='pov_arti.art_nomb', read_only=True, allow_null=True)
     mar_nomb = serializers.CharField(source='pov_arti.mar_codi.mar_nomb', read_only=True, allow_null=True)
     col_nomb = serializers.CharField(source='pov_colo.col_nomb', read_only=True, allow_null=True)
