@@ -67,7 +67,12 @@ export function VistaPrevia({
   // Convertir imagen URL a base64 para PDF
   const imageUrlToBase64 = async (url: string): Promise<string> => {
     try {
-      const response = await fetch(url)
+      let finalUrl = url
+      if (url.startsWith('/')) {
+        const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+        finalUrl = `${API_BASE}${url}`
+      }
+      const response = await fetch(finalUrl, { mode: 'cors' })
       const blob = await response.blob()
       return new Promise((resolve) => {
         const reader = new FileReader()
@@ -75,6 +80,7 @@ export function VistaPrevia({
         reader.readAsDataURL(blob)
       })
     } catch (error) {
+      console.error("Error al convertir imagen a base64:", error)
       return ''
     }
   }

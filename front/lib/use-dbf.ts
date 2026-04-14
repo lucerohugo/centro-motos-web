@@ -358,10 +358,16 @@ export async function generarPDFPedidoGuardado(
       if (raw) {
         const data = JSON.parse(raw)
         // Intentar obtener de revendedor.rev_logo_url (nuevo formato) o rev_logo_url (viejo)
-        const logoUrl = data.revendedor?.rev_logo_url || data.rev_logo_url
+        let logoUrl = data.revendedor?.rev_logo_url || data.rev_logo_url
         
         if (logoUrl) {
-          const logoResponse = await fetch(logoUrl)
+          // Asegurar que la URL sea absoluta
+          if (logoUrl.startsWith('/')) {
+            const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+            logoUrl = `${API_BASE}${logoUrl}`
+          }
+
+          const logoResponse = await fetch(logoUrl, { mode: 'cors' })
           const blob = await logoResponse.blob()
           logoBase64 = await new Promise<string>((resolve) => {
             const reader = new FileReader()
@@ -571,7 +577,11 @@ export async function generarPDFPedidoGuardado(
       margin: 10,
       filename: `Pedido_${codigoExistente}_${new Date().toISOString().split('T')[0]}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
+      html2canvas: { 
+        scale: 2,
+        useCORS: true,
+        allowTaint: true
+      },
       jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
     }
 
