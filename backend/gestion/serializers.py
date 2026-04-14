@@ -198,31 +198,6 @@ class ClientesSerializer(serializers.ModelSerializer):
 # PEDIDOS
 # ================================================================
 class PedidosSerializer(serializers.ModelSerializer):
-    rev_codi = serializers.PrimaryKeyRelatedField(
-        queryset=Revendedor.objects.all(),
-        required=True,
-        help_text="ID del revendedor"
-    )
-    pov_arti = serializers.PrimaryKeyRelatedField(
-        queryset=Articulos.objects.all(),
-        required=False,
-        allow_null=True
-    )
-    pov_colo = serializers.PrimaryKeyRelatedField(
-        queryset=Color.objects.all(),
-        required=False,
-        allow_null=True
-    )
-    loc_codi = serializers.PrimaryKeyRelatedField(
-        queryset=Localidad.objects.all(),
-        required=False,
-        allow_null=True
-    )
-    civ_codi = serializers.PrimaryKeyRelatedField(
-        queryset=CondicionIva.objects.all(),
-        required=False,
-        allow_null=True
-    )
     rev_nomb = serializers.CharField(source='rev_codi.rev_nomb', read_only=True)
     art_nomb = serializers.CharField(source='pov_arti.art_nomb', read_only=True, allow_null=True)
     mar_nomb = serializers.CharField(source='pov_arti.mar_codi.mar_nomb', read_only=True, allow_null=True)
