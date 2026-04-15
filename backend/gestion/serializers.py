@@ -232,6 +232,30 @@ class PedidosSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['pov_codi', 'pov_fchc', 'pov_fmod', 'ped_fexp']
 
+    def validate(self, data):
+        """
+        Validar que el pedido no sea de una moto ya vendida.
+        
+        Regla: Si pov_ncha está informado, verificar en Stock:
+        - Si existe Stock con ese chasis
+        - Si art_bdis != 'V' (no es vendido), permitir
+        - Si art_bdis == 'V', lanzar error
+        - Si no existe, permitir (puede ser dato manual)
+        """
+        pov_ncha = data.get('pov_ncha')
+        
+        if pov_ncha:  # Solo si se informó chasis
+            from .models import Stock
+            
+            stock = Stock.objects.filter(art_ncha=pov_ncha).first()
+            
+            if stock and stock.art_bdis == 'V':
+                raise serializers.ValidationError(
+                    f"La motocicleta con chasis {pov_ncha} ya fue vendida"
+                )
+        
+        return data
+
     def create(self, validated_data):
         """Al crear un pedido, sincronizar datos del cliente en la tabla Clientes."""
         pedido = super().create(validated_data)
