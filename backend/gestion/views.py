@@ -199,7 +199,7 @@ class StockViewSet(BulkCreateMixin, BaseViewSet):
     lookup_field_name = "stk_codi"
     
     # Filtros habilitados
-    filterset_fields = ['art_dest', 'art_codi__mar_codi', 'art_codi__sru_codi', 'col_codi']
+    filterset_fields = ['art_dest', 'art_codi__mar_codi', 'art_codi__sru_codi', 'col_codi', 'art_codi__art_bdis']
     
     # Búsqueda por múltiples campos (busca en art_codi relacionado)
     search_fields = ['art_codi__art_nomb', 'art_ncha', 'art_nmot', 'art_ncer', 'art_codi__art_codi']
@@ -212,7 +212,7 @@ class StockViewSet(BulkCreateMixin, BaseViewSet):
     pagination_class = None
     
     def get_queryset(self):
-        """Solo retorna stock si art_dest es válido y está en query_params"""
+        """Solo retorna stock si art_dest es válido y está en query_params, y art_bdis sea 'N'"""
         queryset = Stock.objects.all().select_related('art_codi', 'col_codi')
         
         # Requerir art_dest en query params
@@ -229,8 +229,8 @@ class StockViewSet(BulkCreateMixin, BaseViewSet):
         except (ValueError, TypeError):
             return queryset.none()
         
-        # Filtrar por art_dest directamente
-        return queryset.filter(art_dest=art_dest_int)
+        # Filtrar por art_dest y art_bdis='N' (solo motos normales, no discontinuadas)
+        return queryset.filter(art_dest=art_dest_int, art_codi__art_bdis='N')
 
 
 class ConfirmacionVentaViewSet(BulkCreateMixin, BaseViewSet):
@@ -294,8 +294,6 @@ class PedidosViewSet(BaseViewSet):
     queryset = Pedidos.objects.all()
     serializer_class = PedidosSerializer
     filterset_fields = ['rev_codi']
-    ordering_fields = ['pov_codi', 'pov_fech', '-pov_codi']
-    ordering = ['-pov_codi']
     ordering_fields = ['pov_codi', 'pov_fech', '-pov_codi']
     ordering = ['-pov_codi']
 
