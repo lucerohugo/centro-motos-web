@@ -220,7 +220,7 @@ class StockViewSet(BulkCreateMixin, BaseViewSet):
     pagination_class = None
     
     def get_queryset(self):
-        """Solo retorna stock si art_dest es válido y está en query_params, y art_bdis sea 'N'"""
+        """Solo retorna stock si art_dest es válido y está en query_params, y art_bdis esté vacío"""
         queryset = Stock.objects.all().select_related('art_codi', 'col_codi')
         
         # Requerir art_dest en query params
@@ -237,10 +237,11 @@ class StockViewSet(BulkCreateMixin, BaseViewSet):
         except (ValueError, TypeError):
             return queryset.none()
         
-        # Filtrar por art_dest y art_bdis='N' directamente en Stock
+        # Filtrar por art_dest y art_bdis vacío (disponible)
+        # art_bdis vacío = disponible, si tiene contenido = no disponible
         return queryset.filter(
             art_dest=art_dest_int,
-            art_bdis='N'
+            art_bdis=''  # Vacío = disponible
         )
 
 
