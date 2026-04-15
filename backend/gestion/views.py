@@ -201,7 +201,13 @@ class StockViewSet(BulkCreateMixin, BaseViewSet):
     lookup_field_name = "stk_codi"
     
     # Filtros habilitados
-    filterset_fields = ['art_dest', 'art_codi__mar_codi', 'art_codi__sru_codi', 'col_codi', 'art_codi__art_bdis']
+    filterset_fields = [
+        'art_dest',
+        'art_codi__mar_codi',
+        'art_codi__sru_codi',
+        'col_codi',
+        'art_bdis'
+    ]
     
     # Búsqueda por múltiples campos (busca en art_codi relacionado)
     search_fields = ['art_codi__art_nomb', 'art_ncha', 'art_nmot', 'art_ncer', 'art_codi__art_codi']
@@ -231,8 +237,11 @@ class StockViewSet(BulkCreateMixin, BaseViewSet):
         except (ValueError, TypeError):
             return queryset.none()
         
-        # Filtrar por art_dest y art_bdis='N' (solo motos normales, no discontinuadas)
-        return queryset.filter(art_dest=art_dest_int, art_codi__art_bdis='N')
+        # Filtrar por art_dest y art_bdis='N' directamente en Stock
+        return queryset.filter(
+            art_dest=art_dest_int,
+            art_bdis='N'
+        )
 
 
 class ConfirmacionVentaViewSet(BulkCreateMixin, BaseViewSet):
