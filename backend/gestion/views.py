@@ -351,31 +351,24 @@ class PedidosViewSet(BaseViewSet):
     @action(detail=False, methods=['post'])
     def marcar_exportados(self, request):
         """
-        Marcar pedidos como exportados a GeneXus y actualizar Stock.
-        
-        Lógica:
-        - Busca pedidos con ped_exp=False
-        - Obtiene números de chasis válidos
-        - Marca Stock como vendido (art_bdis='V') por chasis
-        - Marca pedidos como exportados (ped_exp=True, ped_fexp=now)
+        Marcar pedidos como exportados a GeneXus.
         
         POST /api/gestion/pedidos/marcar_exportados/
         
         Body (JSON):
         {
-            "pov_codis": [1, 2, 3]
+            "pov_codis": [1, 2, 3]  // Lista de códigos de pedidos a marcar
         }
         
         Response:
         {
             "success": true,
-            "pedidos_actualizados": 3,
-            "stock_actualizado": 3,
+            "message": "3 pedidos marcados como exportados",
+            "updated_count": 3,
             "timestamp": "2026-04-15T12:30:45.123Z"
         }
         """
         from django.utils import timezone
-        from django.db.models import Q
         
         pov_codis = request.data.get('pov_codis', [])
         
@@ -400,37 +393,19 @@ class PedidosViewSet(BaseViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # 1. Obtener pedidos NO exportados
-        pedidos = Pedidos.objects.filter(
+        # Actualizar pedidos no exportados
+        updated_count = Pedidos.objects.filter(
             pov_codi__in=pov_codis,
-            ped_exp=False
-        )
-        
-        # 2. Obtener lista de chasis válidos (no null, no vacío)
-        chasis_list = [
-            p.pov_ncha for p in pedidos 
-            if p.pov_ncha  # Excluir null y strings vacíos
-        ]
-        
-        # 3. Marcar Stock como vendido por chasis
-        stock_actualizado = 0
-        if chasis_list:
-            stock_actualizado = Stock.objects.filter(
-                art_ncha__in=chasis_list,
-                art_bdis__isnull=True  # Solo los disponibles
-            ).update(art_bdis='V')  # V = Vendido
-        
-        # 4. Marcar pedidos como exportados
-        pedidos_actualizados = pedidos.update(
+            ped_exp=False  # Solo los que NO fueron exportados aún
+        ).update(
             ped_exp=True,
             ped_fexp=timezone.now()
         )
         
         return Response({
             'success': True,
-            'pedidos_actualizados': pedidos_actualizados,
-            'stock_actualizado': stock_actualizado,
-            'chasis_procesados': len(chasis_list),
+            'message': f'{updated_count} pedidos marcados como exportados',
+            'updated_count': updated_count,
             'timestamp': timezone.now().isoformat()
         }, status=status.HTTP_200_OK)
 
