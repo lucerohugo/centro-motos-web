@@ -105,6 +105,7 @@ class CondicionIvaViewSet(BulkCreateMixin, BaseViewSet):
     queryset = CondicionIva.objects.all()
     serializer_class = CondicionIvaSerializer
     lookup_field_name = "civ_codi"
+    pagination_class = None
 
     @action(detail=False, methods=['get'])
     def frontend(self, request):
@@ -183,6 +184,7 @@ class ComprobanteViewSet(BulkCreateMixin, BaseViewSet):
     queryset = Comprobante.objects.all()
     serializer_class = ComprobanteSerializer
     lookup_field_name = "com_codi"
+    pagination_class = None
 
 
 class ArticuloViewSet(BulkCreateMixin, BaseViewSet):
