@@ -105,7 +105,6 @@ class CondicionIvaViewSet(BulkCreateMixin, BaseViewSet):
     queryset = CondicionIva.objects.all()
     serializer_class = CondicionIvaSerializer
     lookup_field_name = "civ_codi"
-    pagination_class = None
 
     @action(detail=False, methods=['get'])
     def frontend(self, request):
@@ -184,7 +183,6 @@ class ComprobanteViewSet(BulkCreateMixin, BaseViewSet):
     queryset = Comprobante.objects.all()
     serializer_class = ComprobanteSerializer
     lookup_field_name = "com_codi"
-    pagination_class = None
 
 
 class ArticuloViewSet(BulkCreateMixin, BaseViewSet):
@@ -201,13 +199,7 @@ class StockViewSet(BulkCreateMixin, BaseViewSet):
     lookup_field_name = "stk_codi"
     
     # Filtros habilitados
-    filterset_fields = [
-        'art_dest',
-        'art_codi__mar_codi',
-        'art_codi__sru_codi',
-        'col_codi',
-        'art_bdis'
-    ]
+    filterset_fields = ['art_dest', 'art_codi__mar_codi', 'art_codi__sru_codi', 'col_codi', 'art_bdis']
     
     # Búsqueda por múltiples campos (busca en art_codi relacionado)
     search_fields = ['art_codi__art_nomb', 'art_ncha', 'art_nmot', 'art_ncer', 'art_codi__art_codi']
@@ -220,28 +212,55 @@ class StockViewSet(BulkCreateMixin, BaseViewSet):
     pagination_class = None
     
     def get_queryset(self):
-        """Solo retorna stock si art_dest es válido y está en query_params, y art_bdis esté vacío"""
+        """
+        Filtra stock disponible por depósito.
+        
+        Lógica: art_dest = depósito AND (art_bdis IS NULL OR art_bdis = '')
+        
+        Query params:
+        - art_dest: depósito (requerido)
+        - rev_codi: si se pasa, obtiene rev_dest del revendedor (alternativa a art_dest)
+        """
+        from django.db.models import Q
+        
         queryset = Stock.objects.all().select_related('art_codi', 'col_codi')
         
-        # Requerir art_dest en query params
+        # Buscar art_dest: desde query_params o desde rev_codi
         art_dest = self.request.query_params.get('art_dest')
+        rev_codi = self.request.query_params.get('rev_codi')
         
-        if not art_dest:
-            # Si no hay art_dest, retorna queryset vacío
+        art_dest_int = None
+        
+        # Si viene rev_codi, obtener rev_dest del revendedor
+        if rev_codi and not art_dest:
+            try:
+                rev_codi_int = int(rev_codi)
+                revendedor = Revendedor.objects.filter(rev_codi=rev_codi_int).first()
+                if revendedor and revendedor.rev_dest:
+                    art_dest_int = revendedor.rev_dest
+            except (ValueError, TypeError):
+                pass
+        
+        # Si viene art_dest directamente, usarlo
+        if art_dest:
+            try:
+                art_dest_int = int(art_dest)
+                if art_dest_int <= 0:
+                    art_dest_int = None
+            except (ValueError, TypeError):
+                pass
+        
+        # Si no hay art_dest válido, retornar vacío
+        if not art_dest_int:
             return queryset.none()
         
-        try:
-            art_dest_int = int(art_dest)
-            if art_dest_int <= 0:
-                return queryset.none()
-        except (ValueError, TypeError):
-            return queryset.none()
-        
-        # Filtrar por art_dest y art_bdis vacío (disponible)
-        # art_bdis vacío = disponible, si tiene contenido = no disponible
+        # Filtro principal:
+        # - art_dest = art_dest_int (depósito del revendedor)
+        # - art_bdis está vacío o NULL (disponible, no dado de baja)
         return queryset.filter(
-            art_dest=art_dest_int,
-            art_bdis=''  # Vacío = disponible
+            art_dest=art_dest_int
+        ).filter(
+            Q(art_bdis__isnull=True) | Q(art_bdis='')
         )
 
 
@@ -306,6 +325,8 @@ class PedidosViewSet(BaseViewSet):
     queryset = Pedidos.objects.all()
     serializer_class = PedidosSerializer
     filterset_fields = ['rev_codi']
+    ordering_fields = ['pov_codi', 'pov_fech', '-pov_codi']
+    ordering = ['-pov_codi']
     ordering_fields = ['pov_codi', 'pov_fech', '-pov_codi']
     ordering = ['-pov_codi']
 
