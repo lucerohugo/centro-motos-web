@@ -435,6 +435,7 @@ class Pedidos(models.Model):
         ordering = ["-pov_codi"]
         indexes = [
             models.Index(fields=["rev_codi_id", "-pov_codi"], name="gestion_ped_rev_codi_pov_idx"),
+            models.Index(fields=["ped_exp", "-pov_codi"], name="gestion_ped_exp_pov_idx"),
         ]
 
     def __str__(self):

@@ -324,11 +324,90 @@ class ClientesViewSet(BulkCreateMixin, BaseViewSet):
 class PedidosViewSet(BaseViewSet):
     queryset = Pedidos.objects.all()
     serializer_class = PedidosSerializer
-    filterset_fields = ['rev_codi']
+    filterset_fields = ['rev_codi', 'ped_exp']
     ordering_fields = ['pov_codi', 'pov_fech', '-pov_codi']
     ordering = ['-pov_codi']
-    ordering_fields = ['pov_codi', 'pov_fech', '-pov_codi']
-    ordering = ['-pov_codi']
+    
+    def update(self, request, *args, **kwargs):
+        """
+        Validar que no se modifiquen pedidos ya exportados.
+        Si ped_exp=True, retornar 400 Bad Request.
+        """
+        instance = self.get_object()
+        
+        if instance.ped_exp:
+            return Response(
+                {
+                    'error': 'No se puede modificar un pedido que ya fue exportado',
+                    'ped_exp': instance.ped_exp,
+                    'ped_fexp': instance.ped_fexp
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Continuar con la actualización normal
+        return super().update(request, *args, **kwargs)
+    
+    @action(detail=False, methods=['post'])
+    def marcar_exportados(self, request):
+        """
+        Marcar pedidos como exportados a GeneXus.
+        
+        POST /api/gestion/pedidos/marcar_exportados/
+        
+        Body (JSON):
+        {
+            "pov_codis": [1, 2, 3]  // Lista de códigos de pedidos a marcar
+        }
+        
+        Response:
+        {
+            "success": true,
+            "message": "3 pedidos marcados como exportados",
+            "updated_count": 3,
+            "timestamp": "2026-04-15T12:30:45.123Z"
+        }
+        """
+        from django.utils import timezone
+        
+        pov_codis = request.data.get('pov_codis', [])
+        
+        # Validaciones
+        if not pov_codis:
+            return Response(
+                {'error': 'Se requiere lista de pov_codis'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if not isinstance(pov_codis, list):
+            return Response(
+                {'error': 'pov_codis debe ser una lista de enteros'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            pov_codis = [int(x) for x in pov_codis]
+        except (ValueError, TypeError):
+            return Response(
+                {'error': 'pov_codis debe contener solo enteros'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Actualizar pedidos no exportados
+        updated_count = Pedidos.objects.filter(
+            pov_codi__in=pov_codis,
+            ped_exp=False  # Solo los que NO fueron exportados aún
+        ).update(
+            ped_exp=True,
+            ped_fexp=timezone.now()
+        )
+        
+        return Response({
+            'success': True,
+            'message': f'{updated_count} pedidos marcados como exportados',
+            'updated_count': updated_count,
+            'timestamp': timezone.now().isoformat()
+        }, status=status.HTTP_200_OK)
 
 
 # ================================================================
