@@ -195,6 +195,7 @@ class ArticuloViewSet(BulkCreateMixin, BaseViewSet):
 # INVENTARIO
 # ================================================================
 class StockViewSet(BulkCreateMixin, BaseViewSet):
+    queryset = Stock.objects.all()
     serializer_class = StockSerializer
     lookup_field_name = "stk_codi"
     
