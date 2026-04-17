@@ -199,7 +199,8 @@ class StockViewSet(BulkCreateMixin, BaseViewSet):
     serializer_class = StockSerializer
     lookup_field_name = "stk_codi"
     
-    # Filtros habilitados
+    # ⚠️ Recomendado: podrías sacar art_dest para evitar conflictos,
+    # pero lo dejo como lo tenías
     filterset_fields = ['art_dest', 'art_codi__mar_codi', 'art_codi__sru_codi', 'col_codi', 'art_bdis']
     
     # Búsqueda por múltiples campos (busca en art_codi relacionado)
@@ -214,50 +215,28 @@ class StockViewSet(BulkCreateMixin, BaseViewSet):
     
     def get_queryset(self):
         """
-        Filtra stock disponible por depósito.
+        Filtra stock disponible por revendedor.
         
-        Lógica: art_dest = depósito AND (art_bdis IS NULL OR art_bdis = '')
-        
-        Query params:
-        - art_dest: depósito (requerido)
-        - rev_codi: si se pasa, obtiene rev_dest del revendedor (alternativa a art_dest)
+        Lógica:
+        rev_codi == art_dest
         """
         from django.db.models import Q
         
         queryset = Stock.objects.all().select_related('art_codi', 'col_codi')
         
-        # Buscar art_dest: desde query_params o desde rev_codi
-        art_dest = self.request.query_params.get('art_dest')
         rev_codi = self.request.query_params.get('rev_codi')
-        
-        art_dest_int = None
-        
-        # Si viene rev_codi, obtener rev_dest del revendedor
-        if rev_codi and not art_dest:
-            try:
-                rev_codi_int = int(rev_codi)
-                revendedor = Revendedor.objects.filter(rev_codi=rev_codi_int).first()
-                if revendedor and revendedor.rev_dest:
-                    art_dest_int = revendedor.rev_dest
-            except (ValueError, TypeError):
-                pass
-        
-        # Si viene art_dest directamente, usarlo
-        if art_dest:
-            try:
-                art_dest_int = int(art_dest)
-                if art_dest_int <= 0:
-                    art_dest_int = None
-            except (ValueError, TypeError):
-                pass
-        
-        # Si no hay art_dest válido, retornar vacío
-        if not art_dest_int:
+
+        # ❌ obligatorio
+        if not rev_codi:
             return queryset.none()
-        
-        # Filtro principal:
-        # - art_dest = art_dest_int (depósito del revendedor)
-        # - art_bdis está vacío o NULL (disponible, no dado de baja)
+
+        try:
+            art_dest_int = int(rev_codi)
+            if art_dest_int <= 0:
+                return queryset.none()
+        except (ValueError, TypeError):
+            return queryset.none()
+
         return queryset.filter(
             art_dest=art_dest_int
         ).filter(
