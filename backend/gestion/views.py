@@ -194,14 +194,13 @@ class ArticuloViewSet(BulkCreateMixin, BaseViewSet):
 # ================================================================
 # INVENTARIO
 # ================================================================
-# ================================================================
 class StockViewSet(BulkCreateMixin, BaseViewSet):
     queryset = Stock.objects.all()
     serializer_class = StockSerializer
     lookup_field_name = "stk_codi"
     
-    # ⚠️ Recomendado: sacar art_dest para evitar conflictos
-    filterset_fields = ['art_codi__mar_codi', 'art_codi__sru_codi', 'col_codi', 'art_bdis']
+    # Filtros habilitados
+    filterset_fields = ['art_dest', 'art_codi__mar_codi', 'art_codi__sru_codi', 'col_codi', 'art_bdis']
     
     # Búsqueda por múltiples campos (busca en art_codi relacionado)
     search_fields = ['art_codi__art_nomb', 'art_ncha', 'art_nmot', 'art_ncer', 'art_codi__art_codi']
@@ -212,37 +211,53 @@ class StockViewSet(BulkCreateMixin, BaseViewSet):
     
     # Sin paginación para stock (traer todo)
     pagination_class = None
-
+    
     def get_queryset(self):
         """
-        Filtra stock disponible SOLO por revendedor.
-
+        Filtra stock disponible por depósito.
+        
+        Lógica: art_dest = depósito AND (art_bdis IS NULL OR art_bdis = '')
+        
         Query params:
-        - rev_codi: obligatorio
+        - art_dest: depósito (requerido)
+        - rev_codi: si se pasa, obtiene rev_dest del revendedor (alternativa a art_dest)
         """
         from django.db.models import Q
         
         queryset = Stock.objects.all().select_related('art_codi', 'col_codi')
         
+        # Buscar art_dest: desde query_params o desde rev_codi
+        art_dest = self.request.query_params.get('art_dest')
         rev_codi = self.request.query_params.get('rev_codi')
-
-        # ❌ Si no viene rev_codi → no devuelve nada
-        if not rev_codi:
+        
+        art_dest_int = None
+        
+        # Si viene rev_codi, obtener rev_dest del revendedor
+        if rev_codi and not art_dest:
+            try:
+                rev_codi_int = int(rev_codi)
+                revendedor = Revendedor.objects.filter(rev_codi=rev_codi_int).first()
+                if revendedor and revendedor.rev_dest:
+                    art_dest_int = revendedor.rev_dest
+            except (ValueError, TypeError):
+                pass
+        
+        # Si viene art_dest directamente, usarlo
+        if art_dest:
+            try:
+                art_dest_int = int(art_dest)
+                if art_dest_int <= 0:
+                    art_dest_int = None
+            except (ValueError, TypeError):
+                pass
+        
+        # Si no hay art_dest válido, retornar vacío
+        if not art_dest_int:
             return queryset.none()
-
-        try:
-            rev = Revendedor.objects.filter(rev_codi=int(rev_codi)).first()
-            
-            # ❌ Revendedor inexistente o sin depósito
-            if not rev or not rev.rev_dest:
-                return queryset.none()
-
-            art_dest_int = rev.rev_dest
-
-        except (ValueError, TypeError):
-            return queryset.none()
-
-        # ✅ Filtro final
+        
+        # Filtro principal:
+        # - art_dest = art_dest_int (depósito del revendedor)
+        # - art_bdis está vacío o NULL (disponible, no dado de baja)
         return queryset.filter(
             art_dest=art_dest_int
         ).filter(
