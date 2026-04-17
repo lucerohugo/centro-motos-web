@@ -194,41 +194,61 @@ class ArticuloViewSet(BulkCreateMixin, BaseViewSet):
 # ================================================================
 # INVENTARIO
 # ================================================================
-def get_queryset(self):
-    """
-    Filtra stock disponible SOLO por revendedor.
-
-    Query params:
-    - rev_codi: obligatorio
-    """
-    from django.db.models import Q
+# ================================================================
+class StockViewSet(BulkCreateMixin, BaseViewSet):
+    queryset = Stock.objects.all()
+    serializer_class = StockSerializer
+    lookup_field_name = "stk_codi"
     
-    queryset = Stock.objects.all().select_related('art_codi', 'col_codi')
+    # ⚠️ Recomendado: sacar art_dest para evitar conflictos
+    filterset_fields = ['art_codi__mar_codi', 'art_codi__sru_codi', 'col_codi', 'art_bdis']
     
-    rev_codi = self.request.query_params.get('rev_codi')
+    # Búsqueda por múltiples campos (busca en art_codi relacionado)
+    search_fields = ['art_codi__art_nomb', 'art_ncha', 'art_nmot', 'art_ncer', 'art_codi__art_codi']
+    
+    # Ordenamiento
+    ordering_fields = ['stk_codi', 'art_fing', 'art_mode']
+    ordering = ['stk_codi']
+    
+    # Sin paginación para stock (traer todo)
+    pagination_class = None
 
-    # ❌ Si no viene rev_codi → no devuelve nada
-    if not rev_codi:
-        return queryset.none()
+    def get_queryset(self):
+        """
+        Filtra stock disponible SOLO por revendedor.
 
-    try:
-        rev = Revendedor.objects.filter(rev_codi=int(rev_codi)).first()
+        Query params:
+        - rev_codi: obligatorio
+        """
+        from django.db.models import Q
         
-        # ❌ Revendedor inexistente o sin depósito
-        if not rev or not rev.rev_dest:
+        queryset = Stock.objects.all().select_related('art_codi', 'col_codi')
+        
+        rev_codi = self.request.query_params.get('rev_codi')
+
+        # ❌ Si no viene rev_codi → no devuelve nada
+        if not rev_codi:
             return queryset.none()
 
-        art_dest_int = rev.rev_dest
+        try:
+            rev = Revendedor.objects.filter(rev_codi=int(rev_codi)).first()
+            
+            # ❌ Revendedor inexistente o sin depósito
+            if not rev or not rev.rev_dest:
+                return queryset.none()
 
-    except (ValueError, TypeError):
-        return queryset.none()
+            art_dest_int = rev.rev_dest
 
-    # ✅ Filtro final
-    return queryset.filter(
-        art_dest=art_dest_int
-    ).filter(
-        Q(art_bdis__isnull=True) | Q(art_bdis='')
-    )
+        except (ValueError, TypeError):
+            return queryset.none()
+
+        # ✅ Filtro final
+        return queryset.filter(
+            art_dest=art_dest_int
+        ).filter(
+            Q(art_bdis__isnull=True) | Q(art_bdis='')
+        )
+
 
 class ConfirmacionVentaViewSet(BulkCreateMixin, BaseViewSet):
     queryset = ConfirmacionVenta.objects.all()
