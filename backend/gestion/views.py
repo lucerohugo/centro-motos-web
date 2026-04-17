@@ -194,56 +194,41 @@ class ArticuloViewSet(BulkCreateMixin, BaseViewSet):
 # ================================================================
 # INVENTARIO
 # ================================================================
-class StockViewSet(BulkCreateMixin, BaseViewSet):
-    queryset = Stock.objects.all()
-    serializer_class = StockSerializer
-    lookup_field_name = "stk_codi"
-    
-    # Filtros habilitados
-    filterset_fields = ['art_dest', 'art_codi__mar_codi', 'art_codi__sru_codi', 'col_codi', 'art_bdis']
-    
-    # Búsqueda por múltiples campos (busca en art_codi relacionado)
-    search_fields = ['art_codi__art_nomb', 'art_ncha', 'art_nmot', 'art_ncer', 'art_codi__art_codi']
-    
-    # Ordenamiento
-    ordering_fields = ['stk_codi', 'art_fing', 'art_mode']
-    ordering = ['stk_codi']
-    
-    # Sin paginación para stock (traer todo)
-    pagination_class = None
-    
-    def get_queryset(self):
-        """
-        Filtra stock disponible por depósito.
-        
-        Lógica: art_dest = depósito AND (art_bdis IS NULL OR art_bdis = '')
-        
-        Query params:
-        - art_dest: depósito
-        - rev_codi: se usa directamente como depósito (equivalente a art_dest)
-        """
-        from django.db.models import Q
-        
-        queryset = Stock.objects.all().select_related('art_codi', 'col_codi')
-        
-        art_dest = self.request.query_params.get('art_dest')
-        rev_codi = self.request.query_params.get('rev_codi')
-        
-        # ✅ Unificamos: art_dest tiene prioridad, si no viene usamos rev_codi
-        try:
-            art_dest_int = int(art_dest or rev_codi)
-            if art_dest_int <= 0:
-                return queryset.none()
-        except (ValueError, TypeError):
-            return queryset.none()
-        
-        # ✅ Filtro final correcto
-        return queryset.filter(
-            art_dest=art_dest_int
-        ).filter(
-            Q(art_bdis__isnull=True) | Q(art_bdis='')
-        )
+def get_queryset(self):
+    """
+    Filtra stock disponible SOLO por revendedor.
 
+    Query params:
+    - rev_codi: obligatorio
+    """
+    from django.db.models import Q
+    
+    queryset = Stock.objects.all().select_related('art_codi', 'col_codi')
+    
+    rev_codi = self.request.query_params.get('rev_codi')
+
+    # ❌ Si no viene rev_codi → no devuelve nada
+    if not rev_codi:
+        return queryset.none()
+
+    try:
+        rev = Revendedor.objects.filter(rev_codi=int(rev_codi)).first()
+        
+        # ❌ Revendedor inexistente o sin depósito
+        if not rev or not rev.rev_dest:
+            return queryset.none()
+
+        art_dest_int = rev.rev_dest
+
+    except (ValueError, TypeError):
+        return queryset.none()
+
+    # ✅ Filtro final
+    return queryset.filter(
+        art_dest=art_dest_int
+    ).filter(
+        Q(art_bdis__isnull=True) | Q(art_bdis='')
+    )
 
 class ConfirmacionVentaViewSet(BulkCreateMixin, BaseViewSet):
     queryset = ConfirmacionVenta.objects.all()
