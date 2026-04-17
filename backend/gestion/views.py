@@ -219,45 +219,25 @@ class StockViewSet(BulkCreateMixin, BaseViewSet):
         Lógica: art_dest = depósito AND (art_bdis IS NULL OR art_bdis = '')
         
         Query params:
-        - art_dest: depósito (requerido)
-        - rev_codi: si se pasa, obtiene rev_dest del revendedor (alternativa a art_dest)
+        - art_dest: depósito
+        - rev_codi: se usa directamente como depósito (equivalente a art_dest)
         """
         from django.db.models import Q
         
         queryset = Stock.objects.all().select_related('art_codi', 'col_codi')
         
-        # Buscar art_dest: desde query_params o desde rev_codi
         art_dest = self.request.query_params.get('art_dest')
         rev_codi = self.request.query_params.get('rev_codi')
         
-        art_dest_int = None
-        
-        # Si viene rev_codi, obtener rev_dest del revendedor
-        if rev_codi and not art_dest:
-            try:
-                rev_codi_int = int(rev_codi)
-                revendedor = Revendedor.objects.filter(rev_codi=rev_codi_int).first()
-                if revendedor and revendedor.rev_dest:
-                    art_dest_int = revendedor.rev_dest
-            except (ValueError, TypeError):
-                pass
-        
-        # Si viene art_dest directamente, usarlo
-        if art_dest:
-            try:
-                art_dest_int = int(art_dest)
-                if art_dest_int <= 0:
-                    art_dest_int = None
-            except (ValueError, TypeError):
-                pass
-        
-        # Si no hay art_dest válido, retornar vacío
-        if not art_dest_int:
+        # ✅ Unificamos: art_dest tiene prioridad, si no viene usamos rev_codi
+        try:
+            art_dest_int = int(art_dest or rev_codi)
+            if art_dest_int <= 0:
+                return queryset.none()
+        except (ValueError, TypeError):
             return queryset.none()
         
-        # Filtro principal:
-        # - art_dest = art_dest_int (depósito del revendedor)
-        # - art_bdis está vacío o NULL (disponible, no dado de baja)
+        # ✅ Filtro final correcto
         return queryset.filter(
             art_dest=art_dest_int
         ).filter(
