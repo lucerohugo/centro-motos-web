@@ -181,7 +181,8 @@ export default function MisPedidosPage() {
                     <th className="text-left py-3 px-4 font-semibold text-foreground">Fecha</th>
                     <th className="text-left py-3 px-4 font-semibold text-foreground">Comprador</th>
                     <th className="text-left py-3 px-4 font-semibold text-foreground">Vehículo</th>
-                    <th className="text-right py-3 px-4 font-semibold text-foreground">Monto</th>
+                    <th className="text-right py-3 px-4 font-semibold text-foreground">Precio Lista</th>
+                    <th className="text-right py-3 px-4 font-semibold text-foreground">Importe Crédito</th>
                     <th className="text-center py-3 px-4 font-semibold text-foreground">Estado</th>
                     <th className="text-center py-3 px-4 font-semibold text-foreground">Acciones</th>
                   </tr>
@@ -197,7 +198,10 @@ export default function MisPedidosPage() {
                       <td className="py-3 px-4">{pedido.comprador}</td>
                       <td className="py-3 px-4">{pedido.vehiculo}</td>
                       <td className="py-3 px-4 text-right font-mono">
-                        {formatearMonto(pedido.monto)}
+                        {formatearMonto(pedido.precioLista)}
+                      </td>
+                      <td className="py-3 px-4 text-right font-mono">
+                        {formatearMonto(pedido.importeCredito)}
                       </td>
                       <td className="py-3 px-4 text-center">
                         {pedido.editable ? (

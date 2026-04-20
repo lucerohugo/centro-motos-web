@@ -149,7 +149,8 @@ export interface PedidoResumen {
   fecha: string
   comprador: string
   vehiculo: string
-  monto: number
+  precioLista: number
+  importeCredito: number
   editable: boolean
   datosCompletos?: any
 }
@@ -176,7 +177,8 @@ export async function getPedidosRevendedor(
       fecha: p.pov_fech || '',
       comprador: p.cli_nomb || '-',
       vehiculo: p.art_nomb || '-',
-      monto: p.pov_monf || 0,
+      precioLista: p.pov_plis || 0,
+      importeCredito: p.pov_impc || 0,
       editable: !p.ped_exp, // Editable si NO fue exportado
       datosCompletos: p,
     }))
