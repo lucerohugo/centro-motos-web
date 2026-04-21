@@ -5,7 +5,7 @@ from .views import (
     MarcaViewSet, RubroViewSet, SubrubroViewSet, ColorViewSet, ComprobanteViewSet,
     RevendedorViewSet, ClientesViewSet, ArticuloViewSet,
     UsuarioViewSet, PedidosViewSet, CondicionIvaViewSet, StockViewSet,
-    ConfirmacionVentaViewSet, GeneralViewSet,
+    ConfirmacionVentaViewSet, GeneralViewSet, importar_datos,
     upload_revendedor_logo, delete_revendedor_logo
 )
 
@@ -49,4 +49,5 @@ urlpatterns = [
 
     path('revendedores/<int:pk>/upload-logo/', upload_revendedor_logo, name='upload-logo'),
     path('revendedores/<int:pk>/delete-logo/', delete_revendedor_logo, name='delete-logo'),
+    path('importar/', importar_datos, name='importar-datos'),
 ]

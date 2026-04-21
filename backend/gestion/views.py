@@ -463,3 +463,82 @@ def delete_revendedor_logo(request, pk):
     # Retornar el revendedor serializado (sin logo)
     serializer = RevendedorSerializer(r, context={'request': request})
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+# ================================================================
+#  IMPORTADOR GLOBAL de stkm, articulo y rev
+# ================================================================
+@api_view(['POST'])
+def importar_datos(request):
+    data = request.data
+
+    # Configuración dinámica (podés agregar más después)
+    MODELOS = {
+        "articulos": (Articulos, "art_codi"),
+        "stock": (Stock, "stk_codi"),
+        "revendedores": (Revendedor, "rev_codi"),
+    }
+
+    resultados = {}
+
+    try:
+        with transaction.atomic():
+
+            for key, (model, lookup) in MODELOS.items():
+                items = data.get(key, [])
+                resultados[key] = {
+                    "total": len(items),
+                    "ok": 0,
+                    "error": 0,
+                    "detalle": []
+                }
+
+                for item in items:
+                    try:
+                        if not item.get(lookup):
+                            resultados[key]["error"] += 1
+                            resultados[key]["detalle"].append({
+                                "error": f"Falta campo {lookup}",
+                                "data": item
+                            })
+                            continue
+
+                        data_item = item.copy()
+
+                        # 🔥 limpiar campos vacíos (CLAVE)
+                        data_item = {
+                            k: v for k, v in data_item.items()
+                            if v not in [None, ""]
+                        }
+
+                        # 🔥 convertir FK automáticamente
+                        for field in model._meta.fields:
+                            if field.is_relation and field.many_to_one:
+                                fk_name = field.name
+                                if fk_name in data_item:
+                                    data_item[f"{fk_name}_id"] = data_item.pop(fk_name)
+
+                        obj, created = model.objects.update_or_create(
+                            **{lookup: data_item[lookup]},
+                            defaults=data_item
+                        )
+
+                        resultados[key]["ok"] += 1
+
+                    except Exception as e:
+                        resultados[key]["error"] += 1
+                        resultados[key]["detalle"].append({
+                            "error": str(e),
+                            "data": item
+                        })
+
+        return Response({
+            "success": True,
+            "resultados": resultados
+        }, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({
+            "success": False,
+            "error": str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
