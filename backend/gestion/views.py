@@ -65,7 +65,7 @@ class BulkCreateMixin:
 
                 obj, created = model.objects.update_or_create(
                     **{self.lookup_field_name: data_item[self.lookup_field_name]},
-                    defaults=data_item
+                    defaults={k: v for k, v in data_item.items() if v is not None} #data_item
                 )
 
                 resultados.append({
