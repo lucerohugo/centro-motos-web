@@ -474,9 +474,15 @@ def importar_datos(request):
 
     # Configuración dinámica (podés agregar más después)
     MODELOS = {
+        #mas importantes(ya andan perfecto)
         "articulos": (Articulos, "art_codi"),
         "stock": (Stock, "stk_codi"),
         "revendedores": (Revendedor, "rev_codi"),
+
+        #nuevos 
+        # "rubros": (Rubro, "rub_codi"),
+        # "subrubros": (Subrubro, "sru_codi"),
+        # "colores": (Color, "col_codi"),
     }
 
     resultados = {}

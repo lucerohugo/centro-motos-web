@@ -83,13 +83,13 @@ class ComprobanteAdmin(admin.ModelAdmin):
 
 @admin.register(Articulos)
 class ArticulosAdmin(admin.ModelAdmin):
-    list_display = ['art_codi', 'art_nomb', 'art_mode', 'art_plis', 'art_prec', 'mar_codi', 'sru_codi']
+    list_display = ['art_codi', 'art_nomb', 'art_plis', 'art_prec', 'mar_codi', 'sru_codi']
     list_filter = ['mar_codi', 'sru_codi']
-    search_fields = ['art_nomb', 'art_codi', 'art_mode']
+    search_fields = ['art_nomb', 'art_codi']
     readonly_fields = ['art_fchc', 'art_fmod']
     fieldsets = (
         ('Identificación', {
-            'fields': ('art_codi', 'art_nomb', 'art_mode')
+            'fields': ('art_codi', 'art_nomb')
         }),
         ('Precios', {
             'fields': ('art_plis', 'art_prec', 'art_tprec')

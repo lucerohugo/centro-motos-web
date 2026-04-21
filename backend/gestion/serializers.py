@@ -74,14 +74,13 @@ class ArticuloStockSerializer(serializers.ModelSerializer):
     codigoArticulo = serializers.CharField(source='art_codi')
     descripcion = serializers.CharField(source='art_nomb')
     marca = serializers.CharField(source='mar_codi.mar_nomb')
-    modelo = serializers.CharField(source='art_mode', allow_null=True)
     precioLista = serializers.DecimalField(source='art_plis', max_digits=12, decimal_places=2)
     precioUnitario = serializers.DecimalField(source='art_prec', max_digits=12, decimal_places=2)
 
     class Meta:
         model = Articulos
         fields = [
-            'codigoArticulo', 'descripcion', 'marca', 'modelo', 'precioLista', 'precioUnitario'
+            'codigoArticulo', 'descripcion', 'marca', 'precioLista', 'precioUnitario'
         ]
 
 
@@ -93,7 +92,7 @@ class ArticuloSerializer(serializers.ModelSerializer):
     class Meta:
         model = Articulos
         fields = [
-            'art_codi', 'art_nomb', 'art_mode',
+            'art_codi', 'art_nomb',
             'art_plis', 'art_prec', 'art_tprec',
             'mar_codi', 'mar_nomb', 'sru_codi', 'sru_nomb', 'rub_nomb',
             'art_tiva',

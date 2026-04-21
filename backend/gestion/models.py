@@ -155,7 +155,6 @@ class Articulos(models.Model):
     """Artículos/Motocicletas"""
     art_codi = models.IntegerField(primary_key=True, editable=True)
     art_nomb = models.CharField(max_length=150)
-    art_mode = models.CharField(max_length=100, blank=True, null=True, help_text="Modelo")
     
     # Categorización
     mar_codi = models.ForeignKey(Marca, on_delete=models.SET_NULL, null=True, blank=True, related_name="articulos")
@@ -197,7 +196,7 @@ class Revendedor(models.Model):
     rev_tele = models.CharField(max_length=20, blank=True, help_text="Teléfono")
     rev_dire = models.CharField(max_length=200, blank=True, null=True, help_text="Dirección")
     rev_dest = models.IntegerField(blank=True, null=True, help_text="Depósito asignado (art_dest)")
-    rev_porc = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True, help_text="Porcentaje/Comisión")
+    rev_porc = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True, help_text="Porcentaje/Comisión") #sacar tambien
     rev_clav = models.CharField(max_length=128, blank=True, null=True, help_text="Contraseña/Clave (hasheada)")
     rev_actv = models.BooleanField(default=True, help_text="Activo")
     loc_codi = models.ForeignKey(Localidad, on_delete=models.SET_NULL, null=True, blank=True, related_name="revendedores")
