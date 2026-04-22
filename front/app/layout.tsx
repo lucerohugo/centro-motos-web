@@ -10,7 +10,10 @@ const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono'
 
 export const metadata: Metadata = {
   title: 'BrixSoftware',
-  description: 'Sistema de gestion para concesionaria de motocicletas',
+  description: 'Sistema de gestion para motocicletas',
+  icons: {
+    icon: '/isologo.png',
+  },
 }
 
 export default function RootLayout({
