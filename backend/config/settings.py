@@ -14,9 +14,10 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-dev-key')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = [
-    "api.brixsoft.com",
+    "api.centromotos.com.ar", #el viejo:"api.brixsoft.com"
     "localhost",
     "127.0.0.1",
+    "138.36.237.49"
 ]
 
 # ================================================================
@@ -173,11 +174,11 @@ CSRF_TRUSTED_ORIGINS = [
     "http://138.36.237.49:8000",
     "https://centro-motos-web2.vercel.app",
     "https://centro-motos-web2-hugos-projects-eb634449.vercel.app",
-    "https://api.brixsoft.com",  
+    "https://api.centromotos.com.ar",  #este es el viejo:"https://api.brixsoft.com"
 ]
 
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = False
 
 # Permitir preflight requests
 CORS_ALLOW_HEADERS = [
