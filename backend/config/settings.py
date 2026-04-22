@@ -159,12 +159,13 @@ REST_FRAMEWORK = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    
-    # FRONTEND VERCEL
+
     "https://centro-motos-web2.vercel.app",
     "https://centro-motos-web2-hugos-projects-eb634449.vercel.app",
-    
-    # VPS (para acceso directo si es necesario)
+
+    "https://www.centromotos.com.ar",
+    "https://centromotos.com.ar",
+
     "http://138.36.237.49:8000",
     "http://138.36.237.49",
 ]
