@@ -474,7 +474,7 @@ def importar_datos(request):
 
     MODELOS = {
         "articulos": (Articulos, "art_codi"),
-        "stock": (Stock, "art_codi"),  # 🔥 clave por artículo
+        "stock": (Stock, "art_codi"),  # 🔥 usamos art_codi para actualizar
         "revendedores": (Revendedor, "rev_codi"),
         "rubros": (Rubro, "rub_codi"),
         "subrubros": (Subrubro, "sru_codi"),
@@ -500,20 +500,26 @@ def importar_datos(request):
                     try:
                         data_item = item.copy()
 
-                        # 🔥 limpiar vacíos
+                        # =========================
+                        # LIMPIAR VACÍOS
+                        # =========================
                         data_item = {
                             k: v for k, v in data_item.items()
                             if v not in [None, ""]
                         }
 
-                        # 🔥 convertir FK automáticamente
+                        # =========================
+                        # CONVERTIR FK → *_id
+                        # =========================
                         for field in model._meta.fields:
                             if field.is_relation and field.many_to_one:
                                 fk_name = field.name
                                 if fk_name in data_item:
                                     data_item[f"{fk_name}_id"] = data_item.pop(fk_name)
 
-                        # 🔥 lookup flexible (campo o campo_id)
+                        # =========================
+                        # OBTENER VALOR LOOKUP
+                        # =========================
                         lookup_value = data_item.get(lookup) or data_item.get(f"{lookup}_id")
 
                         if lookup_value is None:
@@ -524,12 +530,40 @@ def importar_datos(request):
                             })
                             continue
 
-                        obj, created = model.objects.update_or_create(
-                            **{lookup: lookup_value},
-                            defaults=data_item
-                        )
+                        # =========================
+                        # 🔥 CASO STOCK (SOLO UPDATE)
+                        # =========================
+                        if key == "stock":
+                            updated = model.objects.filter(
+                                **{f"{lookup}_id": lookup_value}
+                            ).update(**data_item)
 
-                        resultados[key]["ok"] += 1
+                            if updated == 0:
+                                resultados[key]["error"] += 1
+                                resultados[key]["detalle"].append({
+                                    "error": "No existe stock para actualizar",
+                                    "lookup": lookup_value,
+                                    "data": item
+                                })
+                            else:
+                                resultados[key]["ok"] += updated
+
+                        # =========================
+                        # RESTO (CREATE / UPDATE)
+                        # =========================
+                        else:
+                            # detectar si lookup es FK
+                            lookup_field = f"{lookup}_id" if any(
+                                f.name == lookup and f.is_relation
+                                for f in model._meta.fields
+                            ) else lookup
+
+                            obj, created = model.objects.update_or_create(
+                                **{lookup_field: lookup_value},
+                                defaults=data_item
+                            )
+
+                            resultados[key]["ok"] += 1
 
                     except Exception as e:
                         resultados[key]["error"] += 1
