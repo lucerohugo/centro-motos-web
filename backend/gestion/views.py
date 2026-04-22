@@ -472,17 +472,13 @@ def delete_revendedor_logo(request, pk):
 def importar_datos(request):
     data = request.data
 
-    # Configuración dinámica (podés agregar más después)
     MODELOS = {
-        #mas importantes(ya andan perfecto)
         "articulos": (Articulos, "art_codi"),
-        "stock": (Stock, "stk_codi"),
+        "stock": (Stock, "art_codi"),  # 🔥 clave por artículo
         "revendedores": (Revendedor, "rev_codi"),
-
-        #nuevos 
-        # "rubros": (Rubro, "rub_codi"),
-        # "subrubros": (Subrubro, "sru_codi"),
-        # "colores": (Color, "col_codi"),
+        "rubros": (Rubro, "rub_codi"),
+        "subrubros": (Subrubro, "sru_codi"),
+        "colores": (Color, "col_codi"),
     }
 
     resultados = {}
@@ -492,6 +488,7 @@ def importar_datos(request):
 
             for key, (model, lookup) in MODELOS.items():
                 items = data.get(key, [])
+
                 resultados[key] = {
                     "total": len(items),
                     "ok": 0,
@@ -501,17 +498,9 @@ def importar_datos(request):
 
                 for item in items:
                     try:
-                        if not item.get(lookup):
-                            resultados[key]["error"] += 1
-                            resultados[key]["detalle"].append({
-                                "error": f"Falta campo {lookup}",
-                                "data": item
-                            })
-                            continue
-
                         data_item = item.copy()
 
-                        # 🔥 limpiar campos vacíos (CLAVE)
+                        # 🔥 limpiar vacíos
                         data_item = {
                             k: v for k, v in data_item.items()
                             if v not in [None, ""]
@@ -524,8 +513,19 @@ def importar_datos(request):
                                 if fk_name in data_item:
                                     data_item[f"{fk_name}_id"] = data_item.pop(fk_name)
 
+                        # 🔥 lookup flexible (campo o campo_id)
+                        lookup_value = data_item.get(lookup) or data_item.get(f"{lookup}_id")
+
+                        if lookup_value is None:
+                            resultados[key]["error"] += 1
+                            resultados[key]["detalle"].append({
+                                "error": f"Falta campo {lookup}",
+                                "data": item
+                            })
+                            continue
+
                         obj, created = model.objects.update_or_create(
-                            **{lookup: data_item[lookup]},
+                            **{lookup: lookup_value},
                             defaults=data_item
                         )
 
