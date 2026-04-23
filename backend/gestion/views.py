@@ -519,6 +519,35 @@ def importar_datos(request):
                                     data_item[f"{fk_name}_id"] = data_item.pop(fk_name)
 
                         # =====================================================
+                        # 🔥 ARTICULOS → UPDATE / CREATE POR art_codi
+                        # =====================================================
+                        if key == "articulos":
+
+                            art_codi_id = data_item.get("art_codi_id") or data_item.get("art_codi")
+
+                            if art_codi_id is None:
+                                resultados[key]["error"] += 1
+                                resultados[key]["detalle"].append({
+                                    "error": "Falta art_codi",
+                                    "data": item
+                                })
+                                continue
+
+                            obj = model.objects.filter(art_codi=art_codi_id).first()
+
+                            if obj:
+                                # UPDATE
+                                for k, v in data_item.items():
+                                    setattr(obj, k, v)
+                                obj.save()
+                            else:
+                                # CREATE
+                                model.objects.create(**data_item)
+
+                            resultados[key]["ok"] += 1
+                            continue
+
+                        # =====================================================
                         # 🔥 STOCK → UPDATE POR CLAVE COMPLETA
                         # =====================================================
                         if key == "stock":
@@ -548,31 +577,32 @@ def importar_datos(request):
                             else:
                                 resultados[key]["ok"] += updated
 
+                            continue
+
                         # =====================================================
-                        # 🔥 ARBI / RESTO → CREATE OR UPDATE NORMAL
+                        # 🔥 RESTO → UPDATE OR CREATE NORMAL
                         # =====================================================
-                        else:
-                            lookup_value = data_item.get(lookup) or data_item.get(f"{lookup}_id")
+                        lookup_value = data_item.get(lookup) or data_item.get(f"{lookup}_id")
 
-                            if lookup_value is None:
-                                resultados[key]["error"] += 1
-                                resultados[key]["detalle"].append({
-                                    "error": f"Falta campo {lookup}",
-                                    "data": item
-                                })
-                                continue
+                        if lookup_value is None:
+                            resultados[key]["error"] += 1
+                            resultados[key]["detalle"].append({
+                                "error": f"Falta campo {lookup}",
+                                "data": item
+                            })
+                            continue
 
-                            lookup_field = f"{lookup}_id" if any(
-                                f.name == lookup and f.is_relation
-                                for f in model._meta.fields
-                            ) else lookup
+                        lookup_field = f"{lookup}_id" if any(
+                            f.name == lookup and f.is_relation
+                            for f in model._meta.fields
+                        ) else lookup
 
-                            obj, created = model.objects.update_or_create(
-                                **{lookup_field: lookup_value},
-                                defaults=data_item
-                            )
+                        obj, created = model.objects.update_or_create(
+                            **{lookup_field: lookup_value},
+                            defaults=data_item
+                        )
 
-                            resultados[key]["ok"] += 1
+                        resultados[key]["ok"] += 1
 
                     except Exception as e:
                         resultados[key]["error"] += 1
