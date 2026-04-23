@@ -353,62 +353,28 @@ export async function generarPDFPedidoGuardado(
       // Silenciar error
     }
 
-    // Convertir logo a base64
+    // Convertir logo a base64 desde el endpoint directo del backend
     let logoBase64 = ''
     try {
-      let logoUrl = null
-      const API_BASE = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+      const logoUrl = `${API_BASE}/api/gestion/revendedores/${revendedorId}/logo/`
       
-      // Primero intentar obtener del sessionStorage (si está disponible)
-      const raw = typeof window !== 'undefined' ? sessionStorage.getItem('revendedor_login') : null
-      if (raw) {
-        const data = JSON.parse(raw)
-        logoUrl = data.revendedor?.rev_logo_url || data.rev_logo_url
-      }
+      console.log("Intentando descargar logo desde:", logoUrl)
       
-      // Si no está en sessionStorage, obtener del API usando el revendedorId
-      if (!logoUrl && revendedorId > 0) {
-        console.log(`Obteniendo logo del API para revendedor ${revendedorId}`)
-        const revendedorResponse = await fetch(`${API_BASE}/api/gestion/revendedores/${revendedorId}/`)
-        if (revendedorResponse.ok) {
-          const revendedorData = await revendedorResponse.json()
-          logoUrl = revendedorData.rev_logo_url
-        }
-      }
-      
-      if (logoUrl) {
-        console.log("URL de logo encontrada:", logoUrl)
-        
-        // Asegurar que la URL sea absoluta y use HTTPS si es necesario para evitar Mixed Content
-        if (!logoUrl.startsWith('http')) {
-          const cleanPath = logoUrl.startsWith('/') ? logoUrl : `/${logoUrl}`
-          logoUrl = `${API_BASE}${cleanPath}`
-        }
-
-        // Forzar HTTPS para evitar errores de Mixed Content en producción
-        if (logoUrl.startsWith('http://')) {
-          logoUrl = logoUrl.replace('http://', 'https://')
-        }
-        
-        console.log("URL de logo final (forzada HTTPS):", logoUrl)
-
-        const logoResponse = await fetch(logoUrl, { mode: 'cors' })
-        if (logoResponse.ok) {
-          const blob = await logoResponse.blob()
-          logoBase64 = await new Promise<string>((resolve) => {
-            const reader = new FileReader()
-            reader.onloadend = () => resolve(reader.result as string)
-            reader.readAsDataURL(blob)
-          })
-          console.log("Logo convertido a Base64 exitosamente")
-        } else {
-          console.warn(`No se pudo descargar el logo (${logoResponse.status}): ${logoResponse.statusText}`)
-        }
+      const logoResponse = await fetch(logoUrl, { mode: 'cors' })
+      if (logoResponse.ok) {
+        const blob = await logoResponse.blob()
+        logoBase64 = await new Promise<string>((resolve) => {
+          const reader = new FileReader()
+          reader.onloadend = () => resolve(reader.result as string)
+          reader.readAsDataURL(blob)
+        })
+        console.log("Logo convertido a Base64 exitosamente")
       } else {
-        console.warn("No se encontró URL de logo")
+        console.warn(`No se pudo descargar el logo (${logoResponse.status}): ${logoResponse.statusText}`)
       }
     } catch (err) {
-      console.error("Error al cargar logo para PDF:", err)
+      console.warn("Error al cargar logo para PDF:", err)
     }
 
     // Helpers (IDÉNTICOS a vista-previa.tsx)

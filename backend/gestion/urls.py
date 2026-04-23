@@ -6,7 +6,7 @@ from .views import (
     RevendedorViewSet, ClientesViewSet, ArticuloViewSet,
     UsuarioViewSet, PedidosViewSet, CondicionIvaViewSet, StockViewSet,
     ConfirmacionVentaViewSet, GeneralViewSet, importar_datos,
-    upload_revendedor_logo, delete_revendedor_logo
+    get_revendedor_logo, upload_revendedor_logo, delete_revendedor_logo
 )
 
 # 👇 CLAVE: agregar trailing_slash opcional
@@ -47,6 +47,7 @@ router.register(r'general', GeneralViewSet, basename='general')
 urlpatterns = [
     path('', include(router.urls)),
 
+    path('revendedores/<int:pk>/logo/', get_revendedor_logo, name='get-logo'),
     path('revendedores/<int:pk>/upload-logo/', upload_revendedor_logo, name='upload-logo'),
     path('revendedores/<int:pk>/delete-logo/', delete_revendedor_logo, name='delete-logo'),
     path('importar/', importar_datos, name='importar-datos'),

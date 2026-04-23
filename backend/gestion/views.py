@@ -5,6 +5,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.parsers import MultiPartParser, FormParser
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db import IntegrityError, transaction
+from django.http import FileResponse
 
 from django.contrib.auth.hashers import check_password
 
@@ -427,6 +428,24 @@ class GeneralViewSet(BaseViewSet):
 # ================================================================
 # LOGOS
 # ================================================================
+@api_view(['GET'])
+def get_revendedor_logo(request, pk):
+    """GET /revendedores/{id}/logo/ - Retorna la imagen del logo del revendedor"""
+    try:
+        r = Revendedor.objects.get(rev_codi=pk)
+    except Revendedor.DoesNotExist:
+        return Response({'error': 'Revendedor no encontrado'}, status=404)
+
+    if not r.rev_logo:
+        return Response({'error': 'No hay logo'}, status=404)
+
+    try:
+        # Retornar la imagen como FileResponse
+        return FileResponse(r.rev_logo.open('rb'), content_type='image/jpeg')
+    except Exception as e:
+        return Response({'error': f'Error al obtener logo: {str(e)}'}, status=500)
+
+
 @api_view(['POST'])
 @parser_classes((MultiPartParser, FormParser))
 def upload_revendedor_logo(request, pk):
