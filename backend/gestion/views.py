@@ -506,7 +506,7 @@ def importar_datos(request):
                         # =========================
                         data_item = {
                             k: v
-                            for k, v in data_item.items()           
+                            for k, v in data_item.items()
                         }
 
                         # =========================
@@ -519,11 +519,11 @@ def importar_datos(request):
                                     data_item[f"{fk_name}_id"] = data_item.pop(fk_name)
 
                         # =====================================================
-                        # 🔥 ARTICULOS → UPDATE / CREATE POR art_codi
+                        # 🔥 ARTICULOS → UNIFICADO (CREATE / UPDATE)
                         # =====================================================
                         if key == "articulos":
 
-                            art_codi_id = data_item.get("art_codi_id") or data_item.get("art_codi")
+                            art_codi_id = data_item.get("art_codi") or data_item.get("art_codi_id")
 
                             if art_codi_id is None:
                                 resultados[key]["error"] += 1
@@ -533,16 +533,10 @@ def importar_datos(request):
                                 })
                                 continue
 
-                            obj = model.objects.filter(art_codi=art_codi_id).first()
-
-                            if obj:
-                                # UPDATE
-                                for k, v in data_item.items():
-                                    setattr(obj, k, v)
-                                obj.save()
-                            else:
-                                # CREATE
-                                model.objects.create(**data_item)
+                            obj, created = model.objects.update_or_create(
+                                art_codi=art_codi_id,
+                                defaults=data_item
+                            )
 
                             resultados[key]["ok"] += 1
                             continue
