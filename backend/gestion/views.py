@@ -505,8 +505,8 @@ def importar_datos(request):
                         # NORMALIZAR VACÍOS → NULL
                         # =========================
                         data_item = {
-                            k: (None if v == "" else v)
-                            for k, v in data_item.items()
+                            k: v
+                            for k, v in data_item.items()           
                         }
 
                         # =========================
