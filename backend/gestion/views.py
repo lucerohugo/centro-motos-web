@@ -468,13 +468,14 @@ def delete_revendedor_logo(request, pk):
 # ================================================================
 #  IMPORTADOR GLOBAL de stkm, articulo y rev
 # ================================================================
+#nuevo 
 @api_view(['POST'])
 def importar_datos(request):
     data = request.data
 
     MODELOS = {
         "articulos": (Articulos, "art_codi"),
-        "stock": (Stock, "art_codi"),  # 🔥 usamos art_codi para actualizar
+        "stock": (Stock, "art_codi"),  # 🔥 referencia base
         "revendedores": (Revendedor, "rev_codi"),
         "rubros": (Rubro, "rub_codi"),
         "subrubros": (Subrubro, "sru_codi"),
@@ -517,42 +518,60 @@ def importar_datos(request):
                                 if fk_name in data_item:
                                     data_item[f"{fk_name}_id"] = data_item.pop(fk_name)
 
-                        # =========================
-                        # OBTENER VALOR LOOKUP
-                        # =========================
-                        lookup_value = data_item.get(lookup) or data_item.get(f"{lookup}_id")
-
-                        if lookup_value is None:
-                            resultados[key]["error"] += 1
-                            resultados[key]["detalle"].append({
-                                "error": f"Falta campo {lookup}",
-                                "data": item
-                            })
-                            continue
-
-                        # =========================
-                        # 🔥 CASO STOCK (SOLO UPDATE)
-                        # =========================
+                        # =====================================================
+                        # 🔥 STOCK → UPDATE POR CLAVE COMPLETA
+                        # =====================================================
                         if key == "stock":
+                            art_codi_id = data_item.get("art_codi_id")
+                            art_ncha = data_item.get("art_ncha")
+                            art_nmot = data_item.get("art_nmot")
+                            art_ncer = data_item.get("art_ncer")
+
+                            # validar clave completa
+                            if not all([art_codi_id, art_ncha, art_nmot, art_ncer]):
+                                resultados[key]["error"] += 1
+                                resultados[key]["detalle"].append({
+                                    "error": "Faltan campos clave (art_codi, art_ncha, art_nmot, art_ncer)",
+                                    "data": item
+                                })
+                                continue
+
                             updated = model.objects.filter(
-                                **{f"{lookup}_id": lookup_value}
+                                art_codi_id=art_codi_id,
+                                art_ncha=art_ncha,
+                                art_nmot=art_nmot,
+                                art_ncer=art_ncer
                             ).update(**data_item)
 
                             if updated == 0:
                                 resultados[key]["error"] += 1
                                 resultados[key]["detalle"].append({
                                     "error": "No existe stock para actualizar",
-                                    "lookup": lookup_value,
-                                    "data": item
+                                    "clave": {
+                                        "art_codi": art_codi_id,
+                                        "art_ncha": art_ncha,
+                                        "art_nmot": art_nmot,
+                                        "art_ncer": art_ncer
+                                    }
                                 })
                             else:
                                 resultados[key]["ok"] += updated
 
-                        # =========================
-                        # RESTO (CREATE / UPDATE)
-                        # =========================
+                        # =====================================================
+                        # RESTO → CREATE / UPDATE NORMAL
+                        # =====================================================
                         else:
-                            # detectar si lookup es FK
+                            lookup_value = data_item.get(lookup) or data_item.get(f"{lookup}_id")
+
+                            if lookup_value is None:
+                                resultados[key]["error"] += 1
+                                resultados[key]["detalle"].append({
+                                    "error": f"Falta campo {lookup}",
+                                    "data": item
+                                })
+                                continue
+
+                            # detectar si es FK
                             lookup_field = f"{lookup}_id" if any(
                                 f.name == lookup and f.is_relation
                                 for f in model._meta.fields

@@ -261,10 +261,21 @@ class Stock(models.Model):
         verbose_name = "Stock"
         verbose_name_plural = "Stock"
         ordering = ["art_codi", "art_dest"]
-        indexes = [
-            models.Index(fields=["art_codi_id", "art_dest"]),
+
+        #no permite duplicados  
+        #identifica una unidad por:art_codi + chasis + motor + certificado
+        # funciona perfecto con update_or_create
+        indexes = [ 
+            models.Index(fields=["art_codi_id", "art_dest"]), 
             models.Index(fields=["art_ncha"]),
             models.Index(fields=["art_dest"]),
+        ]
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=["art_codi", "art_ncha", "art_nmot", "art_ncer"],
+                name="unique_stock_unidad"
+            )
         ]
 
     def __str__(self):
