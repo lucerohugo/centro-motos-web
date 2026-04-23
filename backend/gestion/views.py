@@ -505,9 +505,8 @@ def importar_datos(request):
                         # NORMALIZAR VACÍOS → NULL
                         # =========================
                         data_item = {
-                            k: v
+                            k: (None if v == "" else v)
                             for k, v in data_item.items()
-                            if v is not None
                         }
 
                         # =========================
@@ -520,7 +519,7 @@ def importar_datos(request):
                                     data_item[f"{fk_name}_id"] = data_item.pop(fk_name)
 
                         # =====================================================
-                        # 🔥 ARTICULOS → FIX DEFINITIVO
+                        # 🔥 ARTICULOS → FIX DEFINITIVO (SIN DUPLICADOS)
                         # =====================================================
                         if key == "articulos":
 
@@ -534,7 +533,7 @@ def importar_datos(request):
                                 })
                                 continue
 
-                            # 🔥 CRÍTICO: evitar duplicación de clave en defaults
+                            # 🔥 IMPORTANTE: sacar clave del update
                             data_item.pop("art_codi", None)
                             data_item.pop("art_codi_id", None)
 
@@ -547,9 +546,10 @@ def importar_datos(request):
                             continue
 
                         # =====================================================
-                        # 🔥 STOCK → UPDATE POR CLAVE COMPLETA
+                        # 🔥 STOCK → FIX SIN DUPLICADOS (CLAVE COMPUESTA)
                         # =====================================================
                         if key == "stock":
+
                             art_codi_id = data_item.get("art_codi_id")
                             art_ncha = data_item.get("art_ncha")
                             art_nmot = data_item.get("art_nmot")
@@ -563,19 +563,20 @@ def importar_datos(request):
                                 })
                                 continue
 
-                            updated = model.objects.filter(
-                                art_codi_id=art_codi_id,
-                                art_ncha=art_ncha,
-                                art_nmot=art_nmot,
-                                art_ncer=art_ncer
-                            ).update(**data_item)
+                            # 🔥 evitar que se pisen en defaults
+                            lookup_filter = {
+                                "art_codi_id": art_codi_id,
+                                "art_ncha": art_ncha,
+                                "art_nmot": art_nmot,
+                                "art_ncer": art_ncer
+                            }
 
-                            if updated == 0:
-                                model.objects.create(**data_item)
-                                resultados[key]["ok"] += 1
-                            else:
-                                resultados[key]["ok"] += updated
+                            obj, created = model.objects.update_or_create(
+                                **lookup_filter,
+                                defaults=data_item
+                            )
 
+                            resultados[key]["ok"] += 1
                             continue
 
                         # =====================================================
