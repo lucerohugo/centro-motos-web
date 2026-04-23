@@ -475,7 +475,7 @@ def importar_datos(request):
 
     MODELOS = {
         "articulos": (Articulos, "art_codi"),
-        "stock": (Stock, "art_codi"),  # 🔥 referencia base
+        "stock": (Stock, "art_codi"),
         "revendedores": (Revendedor, "rev_codi"),
         "rubros": (Rubro, "rub_codi"),
         "subrubros": (Subrubro, "sru_codi"),
@@ -502,11 +502,11 @@ def importar_datos(request):
                         data_item = item.copy()
 
                         # =========================
-                        # LIMPIAR VACÍOS
+                        # NORMALIZAR VACÍOS → NULL
                         # =========================
                         data_item = {
-                            k: v for k, v in data_item.items()
-                            if v not in [None, ""]
+                            k: (None if v == "" else v)
+                            for k, v in data_item.items()
                         }
 
                         # =========================
@@ -527,11 +527,10 @@ def importar_datos(request):
                             art_nmot = data_item.get("art_nmot")
                             art_ncer = data_item.get("art_ncer")
 
-                            # validar clave completa
                             if not all([art_codi_id, art_ncha, art_nmot, art_ncer]):
                                 resultados[key]["error"] += 1
                                 resultados[key]["detalle"].append({
-                                    "error": "Faltan campos clave (art_codi, art_ncha, art_nmot, art_ncer)",
+                                    "error": "Faltan campos clave",
                                     "data": item
                                 })
                                 continue
@@ -544,21 +543,13 @@ def importar_datos(request):
                             ).update(**data_item)
 
                             if updated == 0:
-                                resultados[key]["error"] += 1
-                                resultados[key]["detalle"].append({
-                                    "error": "No existe stock para actualizar",
-                                    "clave": {
-                                        "art_codi": art_codi_id,
-                                        "art_ncha": art_ncha,
-                                        "art_nmot": art_nmot,
-                                        "art_ncer": art_ncer
-                                    }
-                                })
+                                model.objects.create(**data_item)
+                                resultados[key]["ok"] += 1
                             else:
                                 resultados[key]["ok"] += updated
 
                         # =====================================================
-                        # RESTO → CREATE / UPDATE NORMAL
+                        # 🔥 ARBI / RESTO → CREATE OR UPDATE NORMAL
                         # =====================================================
                         else:
                             lookup_value = data_item.get(lookup) or data_item.get(f"{lookup}_id")
@@ -571,7 +562,6 @@ def importar_datos(request):
                                 })
                                 continue
 
-                            # detectar si es FK
                             lookup_field = f"{lookup}_id" if any(
                                 f.name == lookup and f.is_relation
                                 for f in model._meta.fields
@@ -601,3 +591,5 @@ def importar_datos(request):
             "success": False,
             "error": str(e)
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+#modifique tood el importar_datos 
