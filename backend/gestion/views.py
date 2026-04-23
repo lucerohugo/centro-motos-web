@@ -507,6 +507,7 @@ def importar_datos(request):
                         data_item = {
                             k: v
                             for k, v in data_item.items()
+                            if v is not None
                         }
 
                         # =========================
@@ -519,7 +520,7 @@ def importar_datos(request):
                                     data_item[f"{fk_name}_id"] = data_item.pop(fk_name)
 
                         # =====================================================
-                        # 🔥 ARTICULOS → UNIFICADO (CREATE / UPDATE)
+                        # 🔥 ARTICULOS → FIX DEFINITIVO
                         # =====================================================
                         if key == "articulos":
 
@@ -532,6 +533,10 @@ def importar_datos(request):
                                     "data": item
                                 })
                                 continue
+
+                            # 🔥 CRÍTICO: evitar duplicación de clave en defaults
+                            data_item.pop("art_codi", None)
+                            data_item.pop("art_codi_id", None)
 
                             obj, created = model.objects.update_or_create(
                                 art_codi=art_codi_id,
