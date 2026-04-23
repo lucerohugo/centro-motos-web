@@ -356,47 +356,56 @@ export async function generarPDFPedidoGuardado(
     // Convertir logo a base64
     let logoBase64 = ''
     try {
+      let logoUrl = null
+      const API_BASE = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL
+      
+      // Primero intentar obtener del sessionStorage (si está disponible)
       const raw = typeof window !== 'undefined' ? sessionStorage.getItem('revendedor_login') : null
       if (raw) {
         const data = JSON.parse(raw)
-        console.log("Datos de login recuperados para PDF:", data)
-        
-        // Intentar obtener de revendedor.rev_logo_url (nuevo formato) o rev_logo_url (viejo)
-        let logoUrl = data.revendedor?.rev_logo_url || data.rev_logo_url
-        
-        if (logoUrl) {
-          console.log("URL de logo encontrada:", logoUrl)
-          
-          // Asegurar que la URL sea absoluta y use HTTPS si es necesario para evitar Mixed Content
-          if (!logoUrl.startsWith('http')) {
-            // Si es relativa, la concatenamos con API_BASE_URL (definida al inicio del archivo)
-            const baseUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL
-            const cleanPath = logoUrl.startsWith('/') ? logoUrl : `/${logoUrl}`
-            logoUrl = `${baseUrl}${cleanPath}`
-          }
-
-          // Forzar HTTPS para evitar errores de Mixed Content en producción
-          if (logoUrl.startsWith('http://')) {
-            logoUrl = logoUrl.replace('http://', 'https://')
-          }
-          
-          console.log("URL de logo final (forzada HTTPS):", logoUrl)
-
-          const logoResponse = await fetch(logoUrl, { mode: 'cors' })
-          if (logoResponse.ok) {
-            const blob = await logoResponse.blob()
-            logoBase64 = await new Promise<string>((resolve) => {
-              const reader = new FileReader()
-              reader.onloadend = () => resolve(reader.result as string)
-              reader.readAsDataURL(blob)
-            })
-            console.log("Logo convertido a Base64 exitosamente")
-          } else {
-            console.warn(`No se pudo descargar el logo (${logoResponse.status}): ${logoResponse.statusText}`)
-          }
-        } else {
-          console.warn("No se encontró URL de logo en los datos del revendedor")
+        logoUrl = data.revendedor?.rev_logo_url || data.rev_logo_url
+      }
+      
+      // Si no está en sessionStorage, obtener del API usando el revendedorId
+      if (!logoUrl && revendedorId > 0) {
+        console.log(`Obteniendo logo del API para revendedor ${revendedorId}`)
+        const revendedorResponse = await fetch(`${API_BASE}/api/gestion/revendedores/${revendedorId}/`)
+        if (revendedorResponse.ok) {
+          const revendedorData = await revendedorResponse.json()
+          logoUrl = revendedorData.rev_logo_url
         }
+      }
+      
+      if (logoUrl) {
+        console.log("URL de logo encontrada:", logoUrl)
+        
+        // Asegurar que la URL sea absoluta y use HTTPS si es necesario para evitar Mixed Content
+        if (!logoUrl.startsWith('http')) {
+          const cleanPath = logoUrl.startsWith('/') ? logoUrl : `/${logoUrl}`
+          logoUrl = `${API_BASE}${cleanPath}`
+        }
+
+        // Forzar HTTPS para evitar errores de Mixed Content en producción
+        if (logoUrl.startsWith('http://')) {
+          logoUrl = logoUrl.replace('http://', 'https://')
+        }
+        
+        console.log("URL de logo final (forzada HTTPS):", logoUrl)
+
+        const logoResponse = await fetch(logoUrl, { mode: 'cors' })
+        if (logoResponse.ok) {
+          const blob = await logoResponse.blob()
+          logoBase64 = await new Promise<string>((resolve) => {
+            const reader = new FileReader()
+            reader.onloadend = () => resolve(reader.result as string)
+            reader.readAsDataURL(blob)
+          })
+          console.log("Logo convertido a Base64 exitosamente")
+        } else {
+          console.warn(`No se pudo descargar el logo (${logoResponse.status}): ${logoResponse.statusText}`)
+        }
+      } else {
+        console.warn("No se encontró URL de logo")
       }
     } catch (err) {
       console.error("Error al cargar logo para PDF:", err)
