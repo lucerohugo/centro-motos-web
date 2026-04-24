@@ -204,7 +204,7 @@ class StockViewSet(BulkCreateMixin, BaseViewSet):
     filterset_fields = ['art_dest', 'art_codi__mar_codi', 'art_codi__sru_codi', 'col_codi', 'art_bdis']
     
     # Búsqueda por múltiples campos (busca en art_codi relacionado)
-    search_fields = ['art_codi__art_nomb', 'art_ncha', 'art_nmot', 'art_ncer', 'art_codi__art_codi']
+    search_fields = ['art_codi__art_nomb', 'art_codi__art_codi', 'art_codi__mar_codi__mar_nomb', 'art_ncha', 'art_nmot', 'art_ncer']
     
     # Ordenamiento
     ordering_fields = ['stk_codi', 'art_fing', 'art_mode']
