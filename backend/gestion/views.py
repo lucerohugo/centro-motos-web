@@ -499,7 +499,7 @@ def importar_datos(request):
         "rubros": (Rubro, "rub_codi"),
         "subrubros": (Subrubro, "sru_codi"),
         "colores": (Color, "col_codi"),
-        #"marcas": (Marca, "mar_codi"),
+        "marcas": (Marca, "mar_codi"),
     }
 
     resultados = {}
