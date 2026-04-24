@@ -101,7 +101,8 @@ export default function Page() {
           }
           setRevendedor(updatedRevendedor)
           guardarLogin(updatedRevendedor)
-          // Notificar al header de cambios
+          // Notificar al header de cambios de logo
+          window.dispatchEvent(new Event('logo-updated'))
           window.dispatchEvent(new Event('revendedor-updated'))
           checkLogoRevendedor(updatedRevendedor, true)
           setShowSettings(false)
@@ -136,7 +137,8 @@ export default function Page() {
         }
         setRevendedor(updatedRevendedor)
         guardarLogin(updatedRevendedor)
-        // Notificar al header de cambios
+        // Notificar al header de cambios de logo
+        window.dispatchEvent(new Event('logo-updated'))
         window.dispatchEvent(new Event('revendedor-updated'))
         setLogoRevendedor(null)
       } else {

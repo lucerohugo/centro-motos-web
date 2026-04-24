@@ -43,10 +43,14 @@ export function AppHeader() {
 
     // También escuchar evento personalizado para cambios en la misma pestaña
     window.addEventListener('revendedor-updated', updateRevendedorData)
+    
+    // Escuchar cambios específicos de logo
+    window.addEventListener('logo-updated', updateRevendedorData)
 
     return () => {
       window.removeEventListener('storage', updateRevendedorData)
       window.removeEventListener('revendedor-updated', updateRevendedorData)
+      window.removeEventListener('logo-updated', updateRevendedorData)
     }
   }, [])
 
@@ -54,7 +58,8 @@ export function AppHeader() {
   const loadLogo = async (revendedorId: number) => {
     try {
       const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const logoUrl = `${API_BASE}/api/gestion/revendedores/${revendedorId}/logo/`
+      // Agregar timestamp para forzar que no cachee
+      const logoUrl = `${API_BASE}/api/gestion/revendedores/${revendedorId}/logo/?t=${Date.now()}`
       
       const response = await fetch(logoUrl)
       if (response.ok) {
