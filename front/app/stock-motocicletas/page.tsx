@@ -71,20 +71,21 @@ export default function StockMotocicletasPage() {
   const stockFiltrado = stockMotocicletas || []
 
   return (
-    <main className="min-h-screen bg-background px-6 py-8">
+    <main className="min-h-screen bg-background px-4 md:px-6 py-8">
       <div className="mx-auto max-w-6xl">
         <AppHeader />
         
         <Link
           href={ROUTES.HOME}
-          className="mb-4 inline-flex items-center gap-2 h-9 rounded-lg bg-primary px-5 text-xs font-semibold text-primary-foreground transition-all hover:bg-primary/90"
+          className="mb-4 inline-flex items-center gap-2 h-9 rounded-lg bg-primary px-4 md:px-5 text-xs font-semibold text-primary-foreground transition-all hover:bg-primary/90"
         >
           <ArrowLeft className="h-3.5 w-3.5" strokeWidth={2} />
-          Volver al menu
+          <span className="hidden sm:inline">Volver al menu</span>
+          <span className="sm:hidden">Volver</span>
         </Link>
 
         <div className="mb-4">
-          <h2 className="text-lg font-semibold text-foreground">
+          <h2 className="text-lg md:text-xl font-semibold text-foreground">
             Consulta de Stock
           </h2>
           <p className="mt-0.5 text-xs text-muted-foreground">
@@ -93,8 +94,8 @@ export default function StockMotocicletasPage() {
         </div>
 
         {/* Revendedor (readonly) */}
-        <div className="mb-4 rounded-lg border border-border bg-card px-4 py-3">
-          <div className="grid grid-cols-2 gap-3">
+        <div className="mb-4 rounded-lg border border-border bg-card px-3 md:px-4 py-3">
+          <div className="grid grid-cols-2 gap-2 md:gap-3">
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-foreground">ID Revendedor</label>
               <input 
@@ -117,8 +118,8 @@ export default function StockMotocicletasPage() {
         </div>
 
         {/* Filtros */}
-        <div className="mb-4 rounded-lg border border-border bg-card px-4 py-3">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+        <div className="mb-4 rounded-lg border border-border bg-card px-3 md:px-4 py-3">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-2 md:gap-3 items-end">
             {/* Búsqueda */}
             <div className="flex flex-col gap-1.5 md:col-span-2">
               <label className="text-xs font-semibold text-foreground">Descripción</label>
@@ -168,12 +169,12 @@ export default function StockMotocicletasPage() {
 
         {/* Tabla de Stock */}
         <div className="rounded-lg border border-border bg-card overflow-hidden">
-          <div className="px-4 py-3 border-b border-border">
-            <div className="flex items-center justify-between">
+          <div className="px-3 md:px-4 py-3 border-b border-border">
+            <div className="flex items-center justify-between gap-2">
               <h3 className="text-sm font-semibold text-foreground">
                 Stock de Motocicletas
               </h3>
-              <span className="rounded-lg bg-secondary px-3 py-1.5 font-mono text-xs text-muted-foreground">
+              <span className="rounded-lg bg-secondary px-3 py-1.5 font-mono text-xs text-muted-foreground whitespace-nowrap">
                 {stockFiltrado.length} registros
               </span>
             </div>
@@ -188,19 +189,19 @@ export default function StockMotocicletasPage() {
               No hay motocicletas que coincidan con los filtros
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto -mx-0">
               <Table>
                 <TableHeader>
                   <TableRow className="border-b border-border">
                     <TableHead className="text-xs font-semibold">Código</TableHead>
                     <TableHead className="text-xs font-semibold">Descripción</TableHead>
-                    <TableHead className="text-xs font-semibold">Marca</TableHead>
-                    <TableHead className="text-xs font-semibold">SubRubro</TableHead>
-                    <TableHead className="text-xs font-semibold">Color</TableHead>
+                    <TableHead className="text-xs font-semibold hidden md:table-cell">Marca</TableHead>
+                    <TableHead className="text-xs font-semibold hidden lg:table-cell">SubRubro</TableHead>
+                    <TableHead className="text-xs font-semibold hidden sm:table-cell">Color</TableHead>
                     <TableHead className="text-xs font-semibold">Chasis</TableHead>
-                    <TableHead className="text-xs font-semibold">Motor</TableHead>
-                    <TableHead className="text-xs font-semibold">Certificado</TableHead>
-                    <TableHead className="text-xs font-semibold">Modelo</TableHead>
+                    <TableHead className="text-xs font-semibold hidden md:table-cell">Motor</TableHead>
+                    <TableHead className="text-xs font-semibold hidden lg:table-cell">Certificado</TableHead>
+                    <TableHead className="text-xs font-semibold hidden md:table-cell">Modelo</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -208,13 +209,13 @@ export default function StockMotocicletasPage() {
                     <TableRow key={idx} className="border-b border-border hover:bg-accent/50">
                       <TableCell className="text-xs font-mono">{item.codigoArticulo}</TableCell>
                       <TableCell className="text-xs">{item.descripcion}</TableCell>
-                      <TableCell className="text-xs">{item.marca}</TableCell>
-                      <TableCell className="text-xs">{item.subrubro}</TableCell>
-                      <TableCell className="text-xs">{item.colorNombre || item.color}</TableCell>
+                      <TableCell className="text-xs hidden md:table-cell">{item.marca}</TableCell>
+                      <TableCell className="text-xs hidden lg:table-cell">{item.subrubro}</TableCell>
+                      <TableCell className="text-xs hidden sm:table-cell">{item.colorNombre || item.color}</TableCell>
                       <TableCell className="text-xs font-mono">{item.chassis}</TableCell>
-                      <TableCell className="text-xs font-mono">{item.motor}</TableCell>
-                      <TableCell className="text-xs font-mono">{item.certificado}</TableCell>
-                      <TableCell className="text-xs">{item.modelo}</TableCell>
+                      <TableCell className="text-xs font-mono hidden md:table-cell">{item.motor}</TableCell>
+                      <TableCell className="text-xs font-mono hidden lg:table-cell">{item.certificado}</TableCell>
+                      <TableCell className="text-xs hidden md:table-cell">{item.modelo}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

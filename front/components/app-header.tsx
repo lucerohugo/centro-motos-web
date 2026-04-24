@@ -78,37 +78,37 @@ export function AppHeader() {
   const nombreEmpresa = general?.gen_nomb || "Centro Motos"
 
   return (
-    <header className="mb-6 flex items-center justify-between border-b border-border bg-card/40 backdrop-blur-sm px-6 py-3 -mx-6 -mt-8">
+    <header className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between border-b border-border bg-card/40 backdrop-blur-sm px-4 md:px-6 py-3 -mx-4 md:-mx-6 md:-mt-8 gap-3 md:gap-0">
       {/* Izquierda: Logo Centro Motos + Nombre de la Empresa */}
-      <div className="flex items-center gap-3">
-        <img src="/logocm250.png" alt={nombreEmpresa} width={36} height={36} className="rounded w-9 h-9 object-contain" />
-        <h1 className="text-base font-semibold text-foreground leading-tight">
+      <div className="flex items-center gap-2 md:gap-3 min-w-0">
+        <img src="/logocm250.png" alt={nombreEmpresa} width={36} height={36} className="rounded w-8 h-8 md:w-9 md:h-9 object-contain flex-shrink-0" />
+        <h1 className="text-sm md:text-base font-semibold text-foreground leading-tight truncate">
           {nombreEmpresa}
         </h1>
       </div>
       
       {/* Centro: Info del Revendedor */}
       {revendedor && (
-        <div className="flex items-center gap-3 px-4 py-2 rounded-lg border border-primary/20 bg-primary/5">
-          <div className="h-10 w-10 rounded-md bg-primary/10 flex items-center justify-center overflow-hidden">
+        <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 rounded-lg border border-primary/20 bg-primary/5 min-w-0">
+          <div className="h-8 w-8 md:h-10 md:w-10 rounded-md bg-primary/10 flex items-center justify-center overflow-hidden flex-shrink-0">
             {logoRevendedor ? (
               <img src={logoRevendedor} alt="Logo" className="h-full w-full object-cover" />
             ) : (
-              <UserCheck className="h-5 w-5 text-primary" />
+              <UserCheck className="h-4 w-4 md:h-5 md:w-5 text-primary" />
             )}
           </div>
-          <div className="text-sm">
-            <span className="font-medium text-foreground">{revendedor.nombre}</span>
+          <div className="text-xs md:text-sm min-w-0">
+            <span className="font-medium text-foreground truncate block">{revendedor.nombre}</span>
           </div>
         </div>
       )}
       
       {/* Derecha: Theme Toggle + BrixSoftware */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 md:gap-4 ml-auto md:ml-0">
         <ThemeToggle />
-        <div className="flex items-center gap-2">
-          <img src="/isologo.png" alt="BrixSoftware" width={18} height={18} className="rounded-sm w-5 h-5 object-contain" />
-          <span className="text-xs font-medium text-muted-foreground">BrixSoftware</span>
+        <div className="flex items-center gap-1 md:gap-2">
+          <img src="/isologo.png" alt="BrixSoftware" width={18} height={18} className="rounded-sm w-4 h-4 md:w-5 md:h-5 object-contain flex-shrink-0" />
+          <span className="text-xs font-medium text-muted-foreground hidden sm:inline">BrixSoftware</span>
         </div>
       </div>
     </header>

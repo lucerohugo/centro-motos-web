@@ -293,7 +293,7 @@ function PedidoFacturacionContent() {
   }
 
   return (
-    <main className="min-h-screen bg-background px-6 py-8">
+    <main className="min-h-screen bg-background px-4 md:px-6 py-8">
       {/* Vista Previa del Pedido */}
       {showVistaPrevia && pedidoDataPreview && (
         <VistaPrevia
@@ -310,14 +310,14 @@ function PedidoFacturacionContent() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="w-full max-w-md rounded-lg border border-border bg-card p-6 shadow-lg text-center">
             <CheckCircle className="mx-auto h-16 w-16 text-green-500 mb-4" />
-            <h2 className="text-xl font-semibold text-foreground mb-2">
+            <h2 className="text-lg md:text-xl font-semibold text-foreground mb-2">
               {modoEdicion ? '¡Pedido Actualizado Exitosamente!' : '¡Pedido Registrado Exitosamente!'}
             </h2>
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="text-xs md:text-sm text-muted-foreground mb-4">
               El pedido fue guardado correctamente.
             </p>
             {codigoPedido && (
-              <p className="text-lg font-mono font-semibold text-primary mb-4">
+              <p className="text-base md:text-lg font-mono font-semibold text-primary mb-4">
                 Código: {codigoPedido}
               </p>
             )}
@@ -333,15 +333,16 @@ function PedidoFacturacionContent() {
         
         <Link
           href={ROUTES.HOME}
-          className="mb-4 inline-flex items-center gap-2 h-9 rounded-lg bg-primary px-5 text-xs font-semibold text-primary-foreground transition-all hover:bg-primary/90"
+          className="mb-4 inline-flex items-center gap-2 h-9 rounded-lg bg-primary px-4 md:px-5 text-xs font-semibold text-primary-foreground transition-all hover:bg-primary/90"
         >
           <ArrowLeft className="h-3.5 w-3.5" strokeWidth={2} />
-          Volver al menu
+          <span className="hidden sm:inline">Volver al menu</span>
+          <span className="sm:hidden">Volver</span>
         </Link>
 
-        <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+        <div className="mb-4 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
           <div>
-            <h2 className="text-lg font-semibold text-foreground">
+            <h2 className="text-lg md:text-xl font-semibold text-foreground">
               {modoEdicion ? `Editar Pedido #${codigoEditando}` : 'Pedido de Facturacion'}
             </h2>
             <p className="mt-0.5 text-xs text-muted-foreground">

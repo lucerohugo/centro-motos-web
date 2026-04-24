@@ -231,8 +231,8 @@ export default function Page() {
 
       {/* Modal de Ajustes */}
       {showSettings && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-sm rounded-xl border border-border bg-card p-6 shadow-lg">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-sm rounded-xl border border-border bg-card p-4 md:p-6 shadow-lg">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Ajustes</h2>
               <button
@@ -250,9 +250,9 @@ export default function Page() {
                   Seleccione una imagen PNG para usar como logo de su negocio.
                 </p>
                 
-                <div className="flex items-center gap-4">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                   {logoRevendedor ? (
-                    <div className="relative h-16 w-16 rounded-lg border border-border overflow-hidden group">
+                    <div className="relative h-16 w-16 rounded-lg border border-border overflow-hidden group flex-shrink-0">
                       <img src={logoRevendedor} alt="Logo actual" className="h-full w-full object-cover" />
                       <button
                         onClick={handleDeleteLogo}
@@ -263,7 +263,7 @@ export default function Page() {
                       </button>
                     </div>
                   ) : (
-                    <div className="h-16 w-16 rounded-lg border border-dashed border-border flex items-center justify-center">
+                    <div className="h-16 w-16 rounded-lg border border-dashed border-border flex items-center justify-center flex-shrink-0">
                       <UserCheck className="h-6 w-6 text-muted-foreground" />
                     </div>
                   )}
@@ -307,33 +307,33 @@ export default function Page() {
         </div>
       )}
 
-      <div className="fixed right-6 top-6 flex gap-2">
+      <div className="fixed right-4 md:right-6 top-4 md:top-6 flex gap-2">
         {revendedor && (
           <>
             <button
               onClick={() => setShowSettings(true)}
-              className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground hover:border-primary transition-all"
+              className="flex items-center gap-2 rounded-lg border border-border bg-card px-2 md:px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground hover:border-primary transition-all"
               title="Ajustes"
             >
               <Settings className="h-4 w-4" />
             </button>
             <button
               onClick={handleLogout}
-              className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground hover:border-primary transition-all"
+              className="flex items-center gap-2 rounded-lg border border-border bg-card px-2 md:px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground hover:border-primary transition-all"
             >
               <LogOut className="h-4 w-4" />
-              Cerrar Sesión
+              <span className="hidden sm:inline">Cerrar Sesión</span>
             </button>
           </>
         )}
         <ThemeToggle />
       </div>
 
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md px-4 md:px-0">
         <header className="mb-6 text-center">
-          <div className="flex items-center justify-center gap-3 mb-1">
-            <img src="/logocm250.png" alt="Centro Motos" className="h-14 w-14 rounded" />
-            <h1 className="text-balance text-2xl font-semibold tracking-tight text-foreground">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 mb-1">
+            <img src="/logocm250.png" alt="Centro Motos" className="h-12 sm:h-14 w-12 sm:w-14 rounded" />
+            <h1 className="text-balance text-xl sm:text-2xl font-semibold tracking-tight text-foreground">
               {general?.gen_nomb || 'Centro Motos'}
             </h1>
           </div>
@@ -346,7 +346,7 @@ export default function Page() {
 
         {/* Badge revendedor seleccionado */}
         {revendedor && (
-          <div className="mb-6 flex items-center justify-between rounded-xl border border-primary/30 bg-primary/5 px-4 py-3">
+          <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between rounded-xl border border-primary/30 bg-primary/5 px-3 sm:px-4 py-3 gap-3 sm:gap-0">
             <div className="flex items-center gap-3 min-w-0">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 overflow-hidden">
                 {logoRevendedor ? (

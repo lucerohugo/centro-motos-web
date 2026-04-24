@@ -111,26 +111,27 @@ export default function MisPedidosPage() {
   }
 
   return (
-    <main className="min-h-screen bg-background px-6 py-8">
+    <main className="min-h-screen bg-background px-4 md:px-6 py-8">
       <div className="mx-auto max-w-6xl">
         <AppHeader />
         
         <Link
           href={ROUTES.HOME}
-          className="mb-4 inline-flex items-center gap-2 h-9 rounded-lg bg-primary px-5 text-xs font-semibold text-primary-foreground transition-all hover:bg-primary/90"
+          className="mb-4 inline-flex items-center gap-2 h-9 rounded-lg bg-primary px-4 md:px-5 text-xs font-semibold text-primary-foreground transition-all hover:bg-primary/90"
         >
           <ArrowLeft className="h-3.5 w-3.5" strokeWidth={2} />
-          Volver al menu
+          <span className="hidden sm:inline">Volver al menu</span>
+          <span className="sm:hidden">Volver</span>
         </Link>
 
-        <div className="rounded-lg border border-border bg-card/90 p-6 backdrop-blur-sm">
-          <div className="flex items-center justify-between mb-6">
+        <div className="rounded-lg border border-border bg-card/90 p-4 md:p-6 backdrop-blur-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
             <div>
-              <h1 className="text-2xl font-semibold text-foreground">
+              <h1 className="text-xl md:text-2xl font-semibold text-foreground">
                 Mis Pedidos
               </h1>
               {nombreRevendedor && (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs md:text-sm text-muted-foreground">
                   Revendedor: {nombreRevendedor}
                 </p>
               )}
@@ -139,7 +140,7 @@ export default function MisPedidosPage() {
             <button
               onClick={cargarPedidos}
               disabled={loading}
-              className="inline-flex items-center gap-2 h-9 rounded-lg bg-secondary px-4 text-xs font-semibold text-secondary-foreground transition-all hover:bg-secondary/80 disabled:opacity-50"
+              className="inline-flex items-center justify-center gap-2 h-9 rounded-lg bg-secondary px-4 text-xs font-semibold text-secondary-foreground transition-all hover:bg-secondary/80 disabled:opacity-50"
             >
               <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
               Actualizar
@@ -173,18 +174,18 @@ export default function MisPedidosPage() {
               <p>No hay pedidos registrados</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <div className="overflow-x-auto -mx-4 md:mx-0">
+              <table className="w-full text-xs md:text-sm">
                 <thead>
                   <tr className="border-b border-border">
-                    <th className="text-left py-3 px-4 font-semibold text-foreground">Código</th>
-                    <th className="text-left py-3 px-4 font-semibold text-foreground">Fecha</th>
-                    <th className="text-left py-3 px-4 font-semibold text-foreground">Comprador</th>
-                    <th className="text-left py-3 px-4 font-semibold text-foreground">Vehículo</th>
-                    <th className="text-right py-3 px-4 font-semibold text-foreground">Precio Lista</th>
-                    <th className="text-right py-3 px-4 font-semibold text-foreground">Importe Crédito</th>
-                    <th className="text-center py-3 px-4 font-semibold text-foreground">Estado</th>
-                    <th className="text-center py-3 px-4 font-semibold text-foreground">Acciones</th>
+                    <th className="text-left py-3 px-3 md:px-4 font-semibold text-foreground">Código</th>
+                    <th className="text-left py-3 px-3 md:px-4 font-semibold text-foreground">Fecha</th>
+                    <th className="text-left py-3 px-3 md:px-4 font-semibold text-foreground hidden md:table-cell">Comprador</th>
+                    <th className="text-left py-3 px-3 md:px-4 font-semibold text-foreground hidden lg:table-cell">Vehículo</th>
+                    <th className="text-right py-3 px-3 md:px-4 font-semibold text-foreground">Precio</th>
+                    <th className="text-right py-3 px-3 md:px-4 font-semibold text-foreground hidden md:table-cell">Crédito</th>
+                    <th className="text-center py-3 px-3 md:px-4 font-semibold text-foreground">Estado</th>
+                    <th className="text-center py-3 px-3 md:px-4 font-semibold text-foreground">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -193,44 +194,44 @@ export default function MisPedidosPage() {
                       key={pedido.codigo} 
                       className="border-b border-border/50 hover:bg-muted/30 transition-colors"
                     >
-                      <td className="py-3 px-4 font-mono">{pedido.codigo}</td>
-                      <td className="py-3 px-4">{formatearFecha(pedido.fecha)}</td>
-                      <td className="py-3 px-4">{pedido.comprador}</td>
-                      <td className="py-3 px-4">{pedido.vehiculo}</td>
-                      <td className="py-3 px-4 text-right font-mono">
+                      <td className="py-3 px-3 md:px-4 font-mono text-xs">{pedido.codigo}</td>
+                      <td className="py-3 px-3 md:px-4">{formatearFecha(pedido.fecha)}</td>
+                      <td className="py-3 px-3 md:px-4 hidden md:table-cell text-xs">{pedido.comprador}</td>
+                      <td className="py-3 px-3 md:px-4 hidden lg:table-cell text-xs">{pedido.vehiculo}</td>
+                      <td className="py-3 px-3 md:px-4 text-right font-mono text-xs md:text-sm">
                         {formatearMonto(pedido.precioLista)}
                       </td>
-                      <td className="py-3 px-4 text-right font-mono">
+                      <td className="py-3 px-3 md:px-4 text-right font-mono text-xs md:text-sm hidden md:table-cell">
                         {formatearMonto(pedido.importeCredito)}
                       </td>
-                      <td className="py-3 px-4 text-center">
+                      <td className="py-3 px-3 md:px-4 text-center">
                         {pedido.editable ? (
                           <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-green-500/20 text-green-600">
                             <FileEdit className="h-3 w-3" />
-                            Editable
+                            <span className="hidden sm:inline">Editable</span>
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-amber-500/20 text-amber-600">
                             <Lock className="h-3 w-3" />
-                            Procesado
+                            <span className="hidden sm:inline">Procesado</span>
                           </span>
                         )}
                       </td>
-                      <td className="py-3 px-4 text-center">
-                        <div className="flex items-center justify-center gap-2">
+                      <td className="py-3 px-3 md:px-4 text-center">
+                        <div className="flex items-center justify-center gap-1 md:gap-2">
                           <button
                             onClick={() => handleExportarPDF(pedido)}
                             disabled={exportandoPDF === pedido.codigo}
-                            className="inline-flex items-center gap-1 h-8 px-3 rounded text-xs font-medium transition-all bg-secondary text-secondary-foreground hover:bg-secondary/80 disabled:opacity-50"
+                            className="inline-flex items-center gap-1 h-8 px-2 md:px-3 rounded text-xs font-medium transition-all bg-secondary text-secondary-foreground hover:bg-secondary/80 disabled:opacity-50"
                             title="Exportar PDF"
                           >
                             <FileDown className={`h-3 w-3 ${exportandoPDF === pedido.codigo ? 'animate-pulse' : ''}`} />
-                            PDF
+                            <span className="hidden sm:inline">PDF</span>
                           </button>
                           <button
                             onClick={() => handleEditarPedido(pedido)}
                             disabled={!pedido.editable}
-                            className={`inline-flex items-center gap-1 h-8 px-3 rounded text-xs font-medium transition-all ${
+                            className={`inline-flex items-center gap-1 h-8 px-2 md:px-3 rounded text-xs font-medium transition-all ${
                               pedido.editable
                                 ? 'bg-primary text-primary-foreground hover:bg-primary/90'
                                 : 'bg-muted text-muted-foreground cursor-not-allowed'
@@ -239,12 +240,12 @@ export default function MisPedidosPage() {
                             {pedido.editable ? (
                               <>
                                 <FileEdit className="h-3 w-3" />
-                                Editar
+                                <span className="hidden sm:inline">Editar</span>
                               </>
                             ) : (
                               <>
                                 <Lock className="h-3 w-3" />
-                                Bloqueado
+                                <span className="hidden sm:inline">Bloqueado</span>
                               </>
                             )}
                           </button>
