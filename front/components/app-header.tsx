@@ -10,7 +10,6 @@ interface RevendedorData {
   id: number
   nombre: string
   destino: number
-  rev_logo_url?: string
 }
 
 export function AppHeader() {
@@ -26,11 +25,9 @@ export function AppHeader() {
           const data = JSON.parse(raw)
           setRevendedor(data)
           
-          // Usar rev_logo_url directamente si existe
-          if (data.rev_logo_url) {
-            setLogoRevendedor(data.rev_logo_url + '?t=' + Date.now())
-          } else {
-            setLogoRevendedor(null)
+          // Obtener logo del endpoint si existe revendedor
+          if (data.id) {
+            loadLogo(data.id)
           }
         }
       } catch {
@@ -52,6 +49,25 @@ export function AppHeader() {
       window.removeEventListener('revendedor-updated', updateRevendedorData)
     }
   }, [])
+
+  // Obtener logo del endpoint
+  const loadLogo = async (revendedorId: number) => {
+    try {
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+      const logoUrl = `${API_BASE}/api/gestion/revendedores/${revendedorId}/logo/`
+      
+      const response = await fetch(logoUrl)
+      if (response.ok) {
+        const blob = await response.blob()
+        const logoBase64 = URL.createObjectURL(blob)
+        setLogoRevendedor(logoBase64)
+      } else {
+        setLogoRevendedor(null)
+      }
+    } catch {
+      setLogoRevendedor(null)
+    }
+  }
 
   // URL para el nombre desde el backend
   const nombreEmpresa = general?.gen_nomb || "Centro Motos"

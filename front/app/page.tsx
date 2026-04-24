@@ -17,7 +17,6 @@ interface RevendedorData {
   telefono: string
   celular: string
   email: string
-  rev_logo_url?: string | null
 }
 
 const menuItems = [
@@ -99,7 +98,6 @@ export default function Page() {
             telefono: revendedorData.rev_tele || '',
             celular: '',
             email: revendedorData.rev_emai || '',
-            rev_logo_url: revendedorData.rev_logo_url || null,
           }
           setRevendedor(updatedRevendedor)
           guardarLogin(updatedRevendedor)
@@ -134,8 +132,7 @@ export default function Page() {
 
       if (response.ok) {
         const updatedRevendedor = {
-          ...revendedor,
-          rev_logo_url: null
+          ...revendedor
         }
         setRevendedor(updatedRevendedor)
         guardarLogin(updatedRevendedor)

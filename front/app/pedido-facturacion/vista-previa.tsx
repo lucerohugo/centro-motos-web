@@ -1,7 +1,7 @@
 'use client'
 
 import { X, Download, Edit, Check } from "lucide-react"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { guardarPDF } from "@/lib/use-dbf"
 
 interface PedidoData {
@@ -9,7 +9,6 @@ interface PedidoData {
   revendedor: {
     id: number
     nombre: string
-    rev_logo_url?: string
   }
   detalles: {
     datosComprador: any
@@ -36,24 +35,6 @@ export function VistaPrevia({
 }: VistaPreviaProps) {
   const { datosComprador, datosConyuge, datosVehiculo, formaPago } = pedidoData.detalles
   const [savingPDF, setSavingPDF] = useState(false)
-  const [logoRevendedor, setLogoRevendedor] = useState<string | null>(null)
-
-  // Obtener logo del revendedor desde sessionStorage
-  useEffect(() => {
-    try {
-      const raw = sessionStorage.getItem('revendedor_login')
-      if (raw) {
-        const data = JSON.parse(raw)
-        // El nuevo login anida los datos en data.revendedor
-        const logo = data.revendedor?.rev_logo_url || data.rev_logo_url
-        if (logo) {
-          setLogoRevendedor(logo)
-        }
-      }
-    } catch {
-      // ignorar
-    }
-  }, [])
 
   const formatDate = (dateStr: string) => {
     if (!dateStr) return '-'
@@ -66,41 +47,6 @@ export function VistaPrevia({
     return num.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' })
   }
 
-  // Convertir imagen URL a base64 para PDF
-  const imageUrlToBase64 = async (url: string): Promise<string> => {
-    try {
-      let finalUrl = url
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const baseUrl = API_BASE.endsWith('/') ? API_BASE.slice(0, -1) : API_BASE
-
-      if (!url.startsWith('http')) {
-        const cleanPath = url.startsWith('/') ? url : `/${url}`
-        finalUrl = `${baseUrl}${cleanPath}`
-      }
-
-      // Forzar HTTPS para evitar errores de Mixed Content en producción
-      if (finalUrl.startsWith('http://')) {
-        finalUrl = finalUrl.replace('http://', 'https://')
-      }
-      
-      console.log("Intentando convertir URL de logo a Base64 (HTTPS forzado):", finalUrl)
-      const response = await fetch(finalUrl, { mode: 'cors' })
-      if (!response.ok) {
-        console.warn(`No se pudo descargar el logo (${response.status}): ${response.statusText}`)
-        return ''
-      }
-      const blob = await response.blob()
-      return new Promise((resolve) => {
-        const reader = new FileReader()
-        reader.onloadend = () => resolve(reader.result as string)
-        reader.readAsDataURL(blob)
-      })
-    } catch (error) {
-      console.error("Error al convertir imagen a base64:", error)
-      return ''
-    }
-  }
-
   const handleDescargarPDF = async () => {
     setSavingPDF(true)
     
@@ -111,10 +57,23 @@ export function VistaPrevia({
         ? `Pedido_${codigoExistente}_${fecha}.pdf`
         : `Pedido_Facturacion_${fecha}.pdf`
 
-      // Convertir logo a base64 si existe
+      // Convertir logo a base64 desde el endpoint directo del backend
       let logoBase64 = ''
-      if (logoRevendedor) {
-        logoBase64 = await imageUrlToBase64(logoRevendedor)
+      try {
+        const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+        const logoUrl = `${API_BASE}/api/gestion/revendedores/${pedidoData.revendedor.id}/logo/`
+        
+        const logoResponse = await fetch(logoUrl, { mode: 'cors' })
+        if (logoResponse.ok) {
+          const blob = await logoResponse.blob()
+          logoBase64 = await new Promise<string>((resolve) => {
+            const reader = new FileReader()
+            reader.onloadend = () => resolve(reader.result as string)
+            reader.readAsDataURL(blob)
+          })
+        }
+      } catch {
+        console.warn("No se pudo cargar el logo del revendedor")
       }
 
       // Crear contenido HTML para el PDF

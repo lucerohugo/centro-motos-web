@@ -14,7 +14,6 @@ interface RevendedorData {
   telefono: string
   celular: string
   email: string
-  rev_logo_url?: string | null
 }
 
 interface LoginFormProps {
