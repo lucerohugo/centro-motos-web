@@ -61,17 +61,17 @@ export function AppHeader() {
       // Agregar timestamp para forzar que no cachee
       const logoUrl = `${API_BASE}/api/gestion/revendedores/${revendedorId}/logo/?t=${Date.now()}`
       
-      const response = await fetch(logoUrl, { signal: AbortSignal.timeout(5000) })
-      if (response.ok) {
+      const response = await fetch(logoUrl)
+      if (response.ok && response.status !== 204) {
         const blob = await response.blob()
         const logoBase64 = URL.createObjectURL(blob)
         setLogoRevendedor(logoBase64)
       } else {
-        // 404 o error significa que no tiene logo - es normal, no mostrar error
+        // 204 No Content o error - no tiene logo, es normal
         setLogoRevendedor(null)
       }
     } catch (err) {
-      // Errores de red o timeout - no mostrar, solo dejar sin logo
+      // Error de red - simplemente no mostrar logo
       setLogoRevendedor(null)
     }
   }

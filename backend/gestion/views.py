@@ -434,10 +434,10 @@ def get_revendedor_logo(request, pk):
     try:
         r = Revendedor.objects.get(rev_codi=pk)
     except Revendedor.DoesNotExist:
-        return Response({'error': 'Revendedor no encontrado'}, status=404)
+        return Response(status=204)  # No content - sin error
 
     if not r.rev_logo:
-        return Response({'error': 'No hay logo'}, status=404)
+        return Response(status=204)  # No content - sin error, simplemente no tiene logo
 
     try:
         # Retornar la imagen como FileResponse

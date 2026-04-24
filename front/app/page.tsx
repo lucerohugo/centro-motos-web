@@ -57,13 +57,16 @@ export default function Page() {
       const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
       const logoUrl = `${API_BASE}/api/gestion/revendedores/${revendedorId}/logo/?t=${Date.now()}`
       const response = await fetch(logoUrl)
-      if (response.ok) {
+      if (response.ok && response.status !== 204) {
         const blob = await response.blob()
         const logoBase64 = URL.createObjectURL(blob)
         setLogoRevendedor(logoBase64)
+      } else {
+        // 204 No Content o error - no tiene logo, es normal
+        setLogoRevendedor(null)
       }
     } catch (err) {
-      console.error('Error loading logo:', err)
+      // Error de red - simplemente no mostrar logo
       setLogoRevendedor(null)
     }
   }

@@ -357,24 +357,20 @@ export async function generarPDFPedidoGuardado(
     let logoBase64 = ''
     try {
       const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const logoUrl = `${API_BASE}/api/gestion/revendedores/${revendedorId}/logo/`
-      
-      console.log("Intentando descargar logo desde:", logoUrl)
+      const logoUrl = `${API_BASE}/api/gestion/revendedores/${revendedorId}/logo/?t=${Date.now()}`
       
       const logoResponse = await fetch(logoUrl, { mode: 'cors' })
-      if (logoResponse.ok) {
+      if (logoResponse.ok && logoResponse.status !== 204) {
         const blob = await logoResponse.blob()
         logoBase64 = await new Promise<string>((resolve) => {
           const reader = new FileReader()
           reader.onloadend = () => resolve(reader.result as string)
           reader.readAsDataURL(blob)
         })
-        console.log("Logo convertido a Base64 exitosamente")
-      } else {
-        console.warn(`No se pudo descargar el logo (${logoResponse.status}): ${logoResponse.statusText}`)
       }
+      // Si es 204 (No Content) o error, simplemente no hay logo - es normal
     } catch (err) {
-      console.warn("Error al cargar logo para PDF:", err)
+      // Error de red - silenciar, simplemente no hay logo
     }
 
     // Helpers (IDÉNTICOS a vista-previa.tsx)
