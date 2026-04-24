@@ -51,6 +51,23 @@ export default function Page() {
   const [logoTimestamp, setLogoTimestamp] = useState(Date.now())
   const { general } = useGeneral()
 
+  // Cargar logo fresco del backend
+  const loadLogoFromBackend = async (revendedorId: number) => {
+    try {
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+      const logoUrl = `${API_BASE}/api/gestion/revendedores/${revendedorId}/logo/?t=${Date.now()}`
+      const response = await fetch(logoUrl)
+      if (response.ok) {
+        const blob = await response.blob()
+        const logoBase64 = URL.createObjectURL(blob)
+        setLogoRevendedor(logoBase64)
+      }
+    } catch (err) {
+      console.error('Error loading logo:', err)
+      setLogoRevendedor(null)
+    }
+  }
+
   // Verificar si existe logo del revendedor
   const checkLogoRevendedor = (revendedorData: RevendedorData, forceRefresh = false) => {
     // Usar el logo del backend si está disponible
@@ -176,6 +193,18 @@ export default function Page() {
       checkLogoRevendedor(savedRevendedor)
     } else {
       setShowLoginForm(true)
+    }
+
+    // Listener para recargar el logo cuando se actualiza
+    const handleLogoUpdate = () => {
+      if (savedRevendedor) {
+        loadLogoFromBackend(savedRevendedor.id)
+      }
+    }
+
+    window.addEventListener('logo-updated', handleLogoUpdate)
+    return () => {
+      window.removeEventListener('logo-updated', handleLogoUpdate)
     }
   }, [])
 
