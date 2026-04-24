@@ -180,8 +180,8 @@ export default function MisPedidosPage() {
                   <tr className="border-b border-border">
                     <th className="text-left py-3 px-3 md:px-4 font-semibold text-foreground">Código</th>
                     <th className="text-left py-3 px-3 md:px-4 font-semibold text-foreground">Fecha</th>
-                    <th className="text-left py-3 px-3 md:px-4 font-semibold text-foreground hidden md:table-cell">Comprador</th>
-                    <th className="text-left py-3 px-3 md:px-4 font-semibold text-foreground hidden lg:table-cell">Vehículo</th>
+                    <th className="text-left py-3 px-3 md:px-4 font-semibold text-foreground">Comprador</th>
+                    <th className="text-left py-3 px-3 md:px-4 font-semibold text-foreground">Vehículo</th>
                     <th className="text-right py-3 px-3 md:px-4 font-semibold text-foreground whitespace-nowrap">Precio Lista</th>
                     <th className="text-right py-3 px-3 md:px-4 font-semibold text-foreground whitespace-nowrap">Importe Crédito</th>
                     <th className="text-center py-3 px-3 md:px-4 font-semibold text-foreground">Estado</th>
@@ -196,8 +196,8 @@ export default function MisPedidosPage() {
                     >
                       <td className="py-3 px-3 md:px-4 font-mono text-xs">{pedido.codigo}</td>
                       <td className="py-3 px-3 md:px-4">{formatearFecha(pedido.fecha)}</td>
-                      <td className="py-3 px-3 md:px-4 hidden md:table-cell text-xs">{pedido.comprador}</td>
-                      <td className="py-3 px-3 md:px-4 hidden lg:table-cell text-xs">{pedido.vehiculo}</td>
+                      <td className="py-3 px-3 md:px-4 text-xs">{pedido.comprador}</td>
+                      <td className="py-3 px-3 md:px-4 text-xs">{pedido.vehiculo}</td>
                       <td className="py-3 px-3 md:px-4 text-right font-mono text-xs md:text-sm">
                         {formatearMonto(pedido.precioLista)}
                       </td>
