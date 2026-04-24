@@ -68,19 +68,10 @@ export default function Page() {
     }
   }
 
-  // Verificar si existe logo del revendedor
+  // Verificar si existe logo del revendedor (cargando del backend)
   const checkLogoRevendedor = (revendedorData: RevendedorData, forceRefresh = false) => {
-    // Usar el logo del backend si está disponible
-    if (revendedorData.rev_logo_url) {
-      if (forceRefresh) {
-        setLogoRevendedor(revendedorData.rev_logo_url + '?t=' + Date.now())
-      } else {
-        setLogoRevendedor(revendedorData.rev_logo_url)
-      }
-    } else {
-      // No hay logo - dejar en null (no mostrar nada)
-      setLogoRevendedor(null)
-    }
+    // Cargar logo fresco del backend
+    loadLogoFromBackend(revendedorData.id)
   }
 
   const handleUploadLogo = async () => {
@@ -121,8 +112,9 @@ export default function Page() {
           // Notificar al header de cambios de logo
           window.dispatchEvent(new Event('logo-updated'))
           window.dispatchEvent(new Event('revendedor-updated'))
-          checkLogoRevendedor(updatedRevendedor, true)
           setShowSettings(false)
+          // Refresh de página para aplicar cambios globales
+          setTimeout(() => window.location.reload(), 500)
         } else {
           const errorData = await response.json()
           alert(`Error al guardar el logo: ${errorData.error || 'Error desconocido'}`)
@@ -158,6 +150,8 @@ export default function Page() {
         window.dispatchEvent(new Event('logo-updated'))
         window.dispatchEvent(new Event('revendedor-updated'))
         setLogoRevendedor(null)
+        // Refresh de página para aplicar cambios globales
+        setTimeout(() => window.location.reload(), 500)
       } else {
         const errorData = await response.json()
         alert(`Error al eliminar el logo: ${errorData.error || 'Error desconocido'}`)
