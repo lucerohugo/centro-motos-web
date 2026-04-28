@@ -88,6 +88,7 @@ class BulkCreateMixin:
 # ================================================================
 class ProvinciaViewSet(BulkCreateMixin, BaseViewSet):
     queryset = Provincia.objects.all()
+    pagination_class = None
     serializer_class = ProvinciaSerializer
     lookup_field_name = "pci_codi"
 
@@ -106,6 +107,7 @@ class CondicionIvaViewSet(BulkCreateMixin, BaseViewSet):
     queryset = CondicionIva.objects.all()
     serializer_class = CondicionIvaSerializer
     lookup_field_name = "civ_codi"
+    pagination_class = None
 
     @action(detail=False, methods=['get'])
     def frontend(self, request):
@@ -120,6 +122,7 @@ class MarcaViewSet(BulkCreateMixin, BaseViewSet):
     queryset = Marca.objects.all()
     serializer_class = MarcaSerializer
     lookup_field_name = "mar_codi"
+    pagination_class = None
     
     @action(detail=False, methods=['get'], url_path='por_destino')
     def por_destino(self, request):
@@ -146,12 +149,14 @@ class RubroViewSet(BulkCreateMixin, BaseViewSet):
     queryset = Rubro.objects.all()
     serializer_class = RubroSerializer
     lookup_field_name = "rub_codi"
+    pagination_class = None
 
 
 class SubrubroViewSet(BulkCreateMixin, BaseViewSet):
     queryset = Subrubro.objects.all()
     serializer_class = SubrubroSerializer
     lookup_field_name = "sru_codi"
+    pagination_class = None
     
     @action(detail=False, methods=['get'], url_path='por_destino')
     def por_destino(self, request):
@@ -178,18 +183,21 @@ class ColorViewSet(BulkCreateMixin, BaseViewSet):
     queryset = Color.objects.all()
     serializer_class = ColorSerializer
     lookup_field_name = "col_codi"
+    pagination_class = None
 
 
 class ComprobanteViewSet(BulkCreateMixin, BaseViewSet):
     queryset = Comprobante.objects.all()
     serializer_class = ComprobanteSerializer
     lookup_field_name = "com_codi"
+    pagination_class = None
 
 
 class ArticuloViewSet(BulkCreateMixin, BaseViewSet):
     queryset = Articulos.objects.all()
     serializer_class = ArticuloSerializer
     lookup_field_name = "art_codi"
+    pagination_class = None
 
 
 # ================================================================
@@ -270,6 +278,7 @@ class ConfirmacionVentaViewSet(BulkCreateMixin, BaseViewSet):
     queryset = ConfirmacionVenta.objects.all()
     serializer_class = ConfirmacionVentaSerializer
     lookup_field_name = "con_codi"
+    pagination_class = None
 
 
 # ================================================================
@@ -279,6 +288,7 @@ class RevendedorViewSet(BulkCreateMixin, BaseViewSet):
     queryset = Revendedor.objects.all()
     serializer_class = RevendedorSerializer
     lookup_field_name = "rev_codi"
+    pagination_class = None
     
     def get_serializer_context(self):
         """Pasar request al contexto del serializer"""
