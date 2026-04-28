@@ -616,8 +616,11 @@ def importar_datos(request):
                         ) else lookup
 
                         # 🔥 SACAR CLAVE DEL DEFAULTS (MUY IMPORTANTE)
-                        data_item.pop(lookup, None)
-                        data_item.pop(f"{lookup}_id", None)
+                        data_item_clean = data_item.copy()
+
+                        # 🔥 SACAR CLAVE DEL DEFAULTS
+                        data_item_clean.pop(lookup, None)
+                        data_item_clean.pop(f"{lookup}_id", None)
 
                         # 🔥 FIX REV_CLAV
                         if key == "revendedores":
