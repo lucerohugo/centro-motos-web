@@ -598,7 +598,38 @@ def importar_datos(request):
                             continue
 
                         # =====================================================
-                        # 🔥 RESTO (ACA ESTA EL FIX IMPORTANTE)
+                        # 🔥 REVendedores (NUEVO - CORRECTO)
+                        # =====================================================
+                        if key == "revendedores":
+
+                            lookup_value = data_item.get("rev_codi")
+
+                            if lookup_value is None:
+                                resultados[key]["error"] += 1
+                                resultados[key]["detalle"].append({
+                                    "error": "Falta rev_codi",
+                                    "data": item
+                                })
+                                continue
+
+                            # 🔥 sacar clave antes del update_or_create
+                            clave = data_item.pop("rev_clav", None)
+
+                            obj, created = model.objects.update_or_create(
+                                rev_codi=lookup_value,
+                                defaults=data_item
+                            )
+
+                            # 🔥 usar set_password + save (como Django User)
+                            if clave:
+                                obj.set_password(clave)
+                                obj.save()
+
+                            resultados[key]["ok"] += 1
+                            continue
+
+                        # =====================================================
+                        # 🔥 RESTO
                         # =====================================================
                         lookup_value = data_item.get(lookup) or data_item.get(f"{lookup}_id")
 
@@ -615,24 +646,8 @@ def importar_datos(request):
                             for f in model._meta.fields
                         ) else lookup
 
-                        # 🔥 SACAR CLAVE DEL DEFAULTS (MUY IMPORTANTE)
-                        data_item_clean = data_item.copy()
-
-                        # 🔥 SACAR CLAVE DEL DEFAULTS
-                        data_item_clean.pop(lookup, None)
-                        data_item_clean.pop(f"{lookup}_id", None)
-
-                        # 🔥 FIX REV_CLAV
-                        if key == "revendedores":
-                            clave = data_item.get("rev_clav")
-
-                            # si viene vacío → no pisar
-                            if not clave:
-                                data_item.pop("rev_clav", None)
-                            else:
-                                from django.contrib.auth.hashers import make_password
-                                if not clave.startswith("pbkdf2_"):
-                                    data_item["rev_clav"] = make_password(clave)
+                        data_item.pop(lookup, None)
+                        data_item.pop(f"{lookup}_id", None)
 
                         obj, created = model.objects.update_or_create(
                             **{lookup_field: lookup_value},

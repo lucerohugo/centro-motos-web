@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
-
+from django.contrib.auth.hashers import make_password, check_password
 
 # ================================================================
 # Provincia
@@ -209,21 +209,13 @@ class Revendedor(models.Model):
     def __str__(self):
         return self.rev_nomb
     
-    def save(self, *args, **kwargs):
-        """Hashear contraseña si es texto plano (no comienza con algoritmo Django)"""
-        from django.contrib.auth.hashers import make_password, is_password_usable
-        
-        if self.rev_clav:
-            # Si no está hasheada (no comienza con 'pbkdf2_sha256' o similar), hashearla
-            if not self.rev_clav.startswith('pbkdf2_sha256$') and \
-               not self.rev_clav.startswith('pbkdf2_sha1$') and \
-               not self.rev_clav.startswith('argon2_argon2id$') and \
-               not self.rev_clav.startswith('scrypt$') and \
-               not self.rev_clav.startswith('bcrypt_sha256$') and \
-               len(self.rev_clav) < 100:  # Los hashes son más largos
-                self.rev_clav = make_password(self.rev_clav)
-        
-        super().save(*args, **kwargs)
+    def set_password(self, raw_password):
+        if raw_password and raw_password.strip():
+            self.rev_clav = make_password(raw_password)
+
+    def check_password(self, raw_password):
+        """Verifica contraseña"""
+        return check_password(raw_password, self.rev_clav)
 
 
 # ================================================================
