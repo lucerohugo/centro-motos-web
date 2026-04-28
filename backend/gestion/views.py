@@ -539,7 +539,7 @@ def importar_datos(request):
                                     data_item[f"{fk_name}_id"] = data_item.pop(fk_name)
 
                         # =====================================================
-                        # 🔥 ARTICULOS → FIX DEFINITIVO (SIN DUPLICADOS)
+                        # 🔥 ARTICULOS
                         # =====================================================
                         if key == "articulos":
 
@@ -553,7 +553,6 @@ def importar_datos(request):
                                 })
                                 continue
 
-                            # 🔥 IMPORTANTE: sacar clave del update
                             data_item.pop("art_codi", None)
                             data_item.pop("art_codi_id", None)
 
@@ -566,7 +565,7 @@ def importar_datos(request):
                             continue
 
                         # =====================================================
-                        # 🔥 STOCK → FIX SIN DUPLICADOS (CLAVE COMPUESTA)
+                        # 🔥 STOCK
                         # =====================================================
                         if key == "stock":
 
@@ -583,7 +582,6 @@ def importar_datos(request):
                                 })
                                 continue
 
-                            # 🔥 evitar que se pisen en defaults
                             lookup_filter = {
                                 "art_codi_id": art_codi_id,
                                 "art_ncha": art_ncha,
@@ -600,7 +598,7 @@ def importar_datos(request):
                             continue
 
                         # =====================================================
-                        # 🔥 RESTO → UPDATE OR CREATE NORMAL
+                        # 🔥 RESTO (ACA ESTA EL FIX IMPORTANTE)
                         # =====================================================
                         lookup_value = data_item.get(lookup) or data_item.get(f"{lookup}_id")
 
@@ -616,6 +614,22 @@ def importar_datos(request):
                             f.name == lookup and f.is_relation
                             for f in model._meta.fields
                         ) else lookup
+
+                        # 🔥 SACAR CLAVE DEL DEFAULTS (MUY IMPORTANTE)
+                        data_item.pop(lookup, None)
+                        data_item.pop(f"{lookup}_id", None)
+
+                        # 🔥 FIX REV_CLAV
+                        if key == "revendedores":
+                            clave = data_item.get("rev_clav")
+
+                            # si viene vacío → no pisar
+                            if not clave:
+                                data_item.pop("rev_clav", None)
+                            else:
+                                from django.contrib.auth.hashers import make_password
+                                if not clave.startswith("pbkdf2_"):
+                                    data_item["rev_clav"] = make_password(clave)
 
                         obj, created = model.objects.update_or_create(
                             **{lookup_field: lookup_value},
