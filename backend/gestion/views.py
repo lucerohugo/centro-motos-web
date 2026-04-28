@@ -606,24 +606,25 @@ def importar_datos(request):
 
                             if lookup_value is None:
                                 resultados[key]["error"] += 1
-                                resultados[key]["detalle"].append({
-                                    "error": "Falta rev_codi",
-                                    "data": item
-                                })
                                 continue
 
-                            # 🔥 sacar clave antes del update_or_create
                             clave = data_item.pop("rev_clav", None)
+
+                            print("CLAVE RECIBIDA:", clave)  # 👈 DEBUG
 
                             obj, created = model.objects.update_or_create(
                                 rev_codi=lookup_value,
                                 defaults=data_item
                             )
 
-                            # 🔥 usar set_password + save (como Django User)
+                            print("ANTES:", obj.rev_clav)  # 👈 DEBUG
+
                             if clave:
                                 obj.set_password(clave)
                                 obj.save()
+                                print("DESPUES:", obj.rev_clav)  # 👈 DEBUG
+                            else:
+                                print("NO ENTRO AL IF")  # 👈 DEBUG
 
                             resultados[key]["ok"] += 1
                             continue
