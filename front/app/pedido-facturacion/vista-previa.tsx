@@ -38,7 +38,10 @@ export function VistaPrevia({
 
   const formatDate = (dateStr: string) => {
     if (!dateStr) return '-'
-    const date = new Date(dateStr)
+    // Parsear fecha ISO sin que JavaScript la interprete como UTC
+    // Esto evita el problema de resta de un día por zona horaria
+    const [year, month, day] = dateStr.split('-')
+    const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
     return date.toLocaleDateString('es-AR')
   }
 
