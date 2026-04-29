@@ -260,12 +260,14 @@ class PedidosAdmin(admin.ModelAdmin):
     ordering = ['-pov_codi']
 
     def get_readonly_fields(self, request, obj=None):
-        """Si el pedido ya fue exportado, todos los campos son readonly excepto ped_exp"""
+        """Si el pedido ya fue exportado, la mayoría de campos son readonly EXCEPTO las fechas"""
         readonly = list(super().get_readonly_fields(request, obj))
         if obj and obj.ped_exp:
-            # Agregar todos los campos como readonly excepto ped_exp (para poder desmarcar si es necesario)
-            all_fields = [f.name for f in obj._meta.fields if f.name != 'ped_exp']
-            readonly = list(set(readonly + all_fields))
+            # Campos que NO se pueden editar si el pedido está exportado
+            # (todos EXCEPTO pov_fech, cli_fnac, pov_flis que sí se pueden editar siempre)
+            non_editable_fields = [f.name for f in obj._meta.fields 
+                                   if f.name not in ['pov_fech', 'cli_fnac', 'pov_flis', 'ped_exp']]
+            readonly = list(set(readonly + non_editable_fields))
         return readonly
 
 
