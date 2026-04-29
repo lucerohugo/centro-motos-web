@@ -511,6 +511,7 @@ def importar_datos(request):
         "subrubros": (Subrubro, "sru_codi"),
         "colores": (Color, "col_codi"),
         "marcas": (Marca, "mar_codi"),
+        "localidades": (Localidad, "loc_codi"),
     }
 
     resultados = {}
