@@ -479,3 +479,57 @@ class Usuario(models.Model):
 
     def __str__(self):
         return self.usu_nomb
+
+
+# ================================================================
+# FILTROS PERSONALIZADOS POR REVENDEDOR
+# ================================================================
+class FiltroRevendedor(models.Model):
+    """Filtros personalizados que cada revendedor puede crear para su stock"""
+    fr_codi = models.AutoField(primary_key=True)
+    rev_codi = models.ForeignKey(Revendedor, on_delete=models.CASCADE, related_name="filtros_personalizados")
+    fr_nomb = models.CharField(max_length=100, help_text="Nombre del filtro (ej: Sucursal, Deposito, etc.)")
+    fr_tipo = models.CharField(max_length=50, help_text="Tipo de filtro (ej: sucursal, Deposito, etc.)")
+    fr_desc = models.TextField(blank=True, null=True, help_text="Descripcion opcional")
+    fr_fcre = models.DateTimeField(auto_now_add=True)
+    fr_fmod = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Filtro Revendedor"
+        verbose_name_plural = "Filtros Revendedor"
+        ordering = ["rev_codi", "fr_nomb"]
+        unique_together = ['rev_codi', 'fr_nomb']  # No permitir nombres duplicados por revendedor
+
+    def __str__(self):
+        return f"{self.rev_codi.rev_nomb} - {self.fr_nomb}"
+
+
+class ValorFiltroStock(models.Model):
+    """
+    Asociación entre Stock y FiltroRevendedor con su valor.
+    
+    Representa: "Este Stock tiene este Filtro con este Valor"
+    
+    Ejemplo:
+    - Stock 1001 (Honda 2024) + Filtro "Sucursal" = "Sucursal 1"
+    - Stock 1002 (Yamaha 2024) + Filtro "Sucursal" = "Sucursal 2"
+    
+    Si no existe una fila, el stock es "general" (sin filtro asignado).
+    
+    CASCADE: Si se elimina el FiltroRevendedor, se eliminan todas sus asociaciones.
+    """
+    vfs_codi = models.AutoField(primary_key=True)
+    stk_codi = models.ForeignKey(Stock, on_delete=models.CASCADE, related_name="valores_filtros")
+    fr_codi = models.ForeignKey(FiltroRevendedor, on_delete=models.CASCADE, related_name="valores_stock")
+    vfs_valor = models.CharField(max_length=100, help_text="Valor del filtro (ej: Sucursal 1, DEstino 2, etc.)")
+    vfs_fcre = models.DateTimeField(auto_now_add=True)
+    vfs_fmod = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Valor Filtro Stock"
+        verbose_name_plural = "Valores Filtros Stock"
+        ordering = ["stk_codi", "fr_codi"]
+        unique_together = ['stk_codi', 'fr_codi']  # Un stock no puede tener dos valores para el mismo filtro
+
+    def __str__(self):
+        return f"{self.stk_codi.art_codi} - {self.fr_codi.fr_nomb}: {self.vfs_valor}"

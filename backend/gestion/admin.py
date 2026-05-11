@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import (
     Provincia, Localidad, Marca, Rubro, Subrubro, Color, Comprobante,
     CondicionIva, Articulos, Revendedor, Stock, ConfirmacionVenta,
-    Clientes, Pedidos, General, Usuario
+    Clientes, Pedidos, General, Usuario, FiltroRevendedor, ValorFiltroStock
 )
 
 
@@ -290,3 +290,45 @@ class UsuarioAdmin(admin.ModelAdmin):
     search_fields = ['usu_nomb']
     readonly_fields = ['usu_fcre']
     ordering = ['usu_nomb']
+
+
+# ================================================================
+# FILTROS PERSONALIZADOS
+# ================================================================
+@admin.register(FiltroRevendedor)
+class FiltroRevendedorAdmin(admin.ModelAdmin):
+    list_display = ['fr_nomb', 'rev_codi', 'fr_tipo', 'fr_fcre']
+    list_filter = ['rev_codi', 'fr_tipo']
+    search_fields = ['fr_nomb', 'rev_codi__rev_nomb']
+    readonly_fields = ['fr_fcre', 'fr_fmod']
+    fieldsets = (
+        ('Identificación', {
+            'fields': ('rev_codi', 'fr_nomb', 'fr_tipo')
+        }),
+        ('Descripción', {
+            'fields': ('fr_desc',)
+        }),
+        ('Control', {
+            'fields': ('fr_fcre', 'fr_fmod'),
+            'classes': ('collapse',)
+        }),
+    )
+    ordering = ['rev_codi', 'fr_nomb']
+
+
+@admin.register(ValorFiltroStock)
+class ValorFiltroStockAdmin(admin.ModelAdmin):
+    list_display = ['stk_codi', 'fr_codi', 'vfs_valor']
+    list_filter = ['fr_codi__rev_codi', 'fr_codi']
+    search_fields = ['stk_codi__stk_codi', 'vfs_valor']
+    readonly_fields = ['vfs_fcre', 'vfs_fmod']
+    fieldsets = (
+        ('Asociación', {
+            'fields': ('stk_codi', 'fr_codi', 'vfs_valor')
+        }),
+        ('Control', {
+            'fields': ('vfs_fcre', 'vfs_fmod'),
+            'classes': ('collapse',)
+        }),
+    )
+    ordering = ['stk_codi', 'fr_codi']

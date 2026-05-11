@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import (
     Provincia, Localidad, Marca, Rubro, Subrubro, Color, Comprobante,
     CondicionIva, Articulos, Revendedor, Stock, ConfirmacionVenta,
-    Clientes, Pedidos, General, Usuario
+    Clientes, Pedidos, General, Usuario, FiltroRevendedor, ValorFiltroStock
 )
 
 
@@ -102,6 +102,28 @@ class ArticuloSerializer(serializers.ModelSerializer):
 
 
 # ================================================================
+# FILTROS PERSONALIZADOS
+# ================================================================
+class FiltroRevendedorSerializer(serializers.ModelSerializer):
+    rev_nomb = serializers.CharField(source='rev_codi.rev_nomb', read_only=True)
+    
+    class Meta:
+        model = FiltroRevendedor
+        fields = ['fr_codi', 'rev_codi', 'rev_nomb', 'fr_nomb', 'fr_tipo', 'fr_desc', 'fr_fcre', 'fr_fmod']
+        read_only_fields = ['fr_codi', 'fr_fcre', 'fr_fmod']
+
+
+class ValorFiltroStockSerializer(serializers.ModelSerializer):
+    fr_nomb = serializers.CharField(source='fr_codi.fr_nomb', read_only=True)
+    stk_codi_display = serializers.CharField(source='stk_codi.stk_codi', read_only=True)
+    
+    class Meta:
+        model = ValorFiltroStock
+        fields = ['vfs_codi', 'stk_codi', 'stk_codi_display', 'fr_codi', 'fr_nomb', 'vfs_valor', 'vfs_fcre', 'vfs_fmod']
+        read_only_fields = ['vfs_codi', 'vfs_fcre', 'vfs_fmod']
+
+
+# ================================================================
 # INVENTARIO
 # ================================================================
 class StockSerializer(serializers.ModelSerializer):
@@ -109,6 +131,7 @@ class StockSerializer(serializers.ModelSerializer):
     col_nomb = serializers.CharField(source='col_codi.col_nomb', read_only=True, allow_null=True)
     mar_nomb = serializers.CharField(source='art_codi.mar_codi.mar_nomb', read_only=True, allow_null=True)
     sru_nomb = serializers.CharField(source='art_codi.sru_codi.sru_nomb', read_only=True, allow_null=True)
+    valores_filtros = ValorFiltroStockSerializer(many=True, read_only=True)
 
     class Meta:
         model = Stock
@@ -119,6 +142,7 @@ class StockSerializer(serializers.ModelSerializer):
             'art_fing', 'art_orco', 'art_tall', 'art_dest',
             'art_codv', 'art_codc', 'art_usad', 'art_prem',
             'art_cobr', 'art_cntr', 'art_sucd', 'art_desa', 'art_bdis',
+            'valores_filtros',
             'stk_fcre', 'stk_fmod'
         ]
         read_only_fields = ['stk_codi', 'stk_fcre', 'stk_fmod']

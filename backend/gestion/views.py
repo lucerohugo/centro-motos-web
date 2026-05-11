@@ -213,7 +213,7 @@ class StockViewSet(BulkCreateMixin, BaseViewSet):
     filterset_fields = ['art_dest', 'art_codi__mar_codi', 'art_codi__sru_codi', 'col_codi', 'art_bdis']
     
     # Búsqueda por múltiples campos (busca en art_codi relacionado)
-    search_fields = ['art_codi__art_nomb', 'art_codi__art_codi', 'art_codi__mar_codi__mar_nomb', 'art_ncha', 'art_nmot', 'art_ncer']
+    search_fields = ['art_codi__art_nomb', 'art_codi__art_codi', 'art_codi__mar_codi__mar_nomb', 'art_ncha', 'art_nmot', 'art_ncer', 'valores_filtros__vfs_valor']
     #search_fields = ['art_codi__art_nomb', 'art_ncha', 'art_nmot', 'art_ncer', 'art_codi__art_codi']
     # Ordenamiento
     ordering_fields = ['stk_codi', 'art_fing', 'art_mode']
@@ -268,11 +268,38 @@ class StockViewSet(BulkCreateMixin, BaseViewSet):
         # Filtro principal:
         # - art_dest = art_dest_int (depósito del revendedor)
         # - art_bdis está vacío o NULL (disponible, no dado de baja)
-        return queryset.filter(
+        queryset = queryset.filter(
             art_dest=art_dest_int
         ).filter(
             Q(art_bdis__isnull=True) | Q(art_bdis='')
         )
+        
+        # NUEVO: Filtrado por un valor de filtro personalizado
+        # Solo un filtro activo a la vez (el usuario selecciona uno, se limpian los demás)
+        filtros_json = self.request.query_params.get('filtros_seleccionados')
+        if filtros_json:
+            try:
+                import json
+                from gestion.models import ValorFiltroStock
+                
+                filtros_seleccionados = json.loads(filtros_json)  # { fr_codi: valor }
+                
+                # Obtener el único filtro activo
+                if filtros_seleccionados:
+                    fr_codi, valor = list(filtros_seleccionados.items())[0]
+                    
+                    # Obtener IDs de motos con este filtro y valor específicos
+                    ids = ValorFiltroStock.objects.filter(
+                        fr_codi=int(fr_codi),
+                        vfs_valor=valor
+                    ).values_list('stk_codi', flat=True).distinct()
+                    
+                    queryset = queryset.filter(stk_codi__in=ids)
+                    
+            except (json.JSONDecodeError, ValueError, TypeError):
+                pass
+        
+        return queryset
 
 
 class ConfirmacionVentaViewSet(BulkCreateMixin, BaseViewSet):
@@ -434,6 +461,77 @@ class UsuarioViewSet(BaseViewSet):
 class GeneralViewSet(BaseViewSet):
     queryset = General.objects.all()
     serializer_class = GeneralSerializer
+
+
+# ================================================================
+# FILTROS PERSONALIZADOS
+# ================================================================
+class FiltroRevendedorViewSet(BaseViewSet):
+    """API para gestionar filtros personalizados por revendedor"""
+    queryset = FiltroRevendedor.objects.all()
+    serializer_class = FiltroRevendedorSerializer
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = ['rev_codi']
+    search_fields = ['fr_nomb', 'fr_tipo']
+    
+    def get_queryset(self):
+        """Filtrar por revendedor si se especifica en query params"""
+        queryset = super().get_queryset()
+        rev_codi = self.request.query_params.get('rev_codi')
+        if rev_codi:
+            queryset = queryset.filter(rev_codi=rev_codi)
+        return queryset
+    
+    def perform_create(self, serializer):
+        """Crear filtro: validar que pertenezca al revendedor logueado"""
+        rev_codi = serializer.validated_data.get('rev_codi')
+        # En producción, agregar validación: rev_codi debe ser del usuario logueado
+        serializer.save()
+    
+    def perform_update(self, serializer):
+        """Actualizar filtro: validar permisos"""
+        instance = self.get_object()
+        # Validar que el filtro pertenezca al revendedor solicitante
+        rev_codi = self.request.query_params.get('rev_codi')
+        if rev_codi and int(rev_codi) != instance.rev_codi.rev_codi:
+            return Response({'error': 'No tienes permiso para editar este filtro'}, status=403)
+        serializer.save()
+    
+    def perform_destroy(self, instance):
+        """Eliminar filtro: validar permisos"""
+        # Validar que el filtro pertenezca al revendedor solicitante
+        rev_codi = self.request.query_params.get('rev_codi')
+        if rev_codi and int(rev_codi) != instance.rev_codi.rev_codi:
+            return Response({'error': 'No tienes permiso para eliminar este filtro'}, status=403)
+        instance.delete()
+    
+    @action(detail=True, methods=['get'])
+    def valores(self, request, pk=None):
+        """GET /filtros-revendedor/{id}/valores/ - Retorna todos los valores únicos de este filtro"""
+        filtro = self.get_object()
+        valores_unicos = filtro.valores_stock.values_list('vfs_valor', flat=True).distinct().order_by('vfs_valor')
+        return Response({'filtro_codi': filtro.fr_codi, 'filtro_nombre': filtro.fr_nomb, 'valores': list(valores_unicos)})
+
+
+class ValorFiltroStockViewSet(BaseViewSet):
+    """API para gestionar valores de filtros asociados a stock"""
+    queryset = ValorFiltroStock.objects.all()
+    serializer_class = ValorFiltroStockSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['stk_codi', 'fr_codi']
+    
+    def get_queryset(self):
+        """Filtrar por stock o por filtro si se especifica"""
+        queryset = super().get_queryset()
+        stk_codi = self.request.query_params.get('stk_codi')
+        fr_codi = self.request.query_params.get('fr_codi')
+        
+        if stk_codi:
+            queryset = queryset.filter(stk_codi=stk_codi)
+        if fr_codi:
+            queryset = queryset.filter(fr_codi=fr_codi)
+            
+        return queryset
 
 
 # ================================================================

@@ -159,6 +159,9 @@ REST_FRAMEWORK = {
 CORS_ALLOWED_ORIGINS = [
     "https://www.centromotos.com.ar",
     "https://centromotos.com.ar",
+
+    "http://localhost:3000", #desp comentar esto una vez termine y pase a produccion 
+    "http://127.0.0.1:3000", #esto tamb
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -167,6 +170,10 @@ CSRF_TRUSTED_ORIGINS = [
     "https://centro-motos-web2.vercel.app",
     "https://centro-motos-web2-hugos-projects-eb634449.vercel.app",
     "https://api.centromotos.com.ar",
+
+    "http://localhost:3000", #coemntar esto taamb  una vez 
+    "http://127.0.0.1:3000", #y esto tambine 
+
 ]
 
 CORS_ALLOW_CREDENTIALS = True

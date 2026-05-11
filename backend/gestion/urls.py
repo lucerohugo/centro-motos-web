@@ -5,8 +5,8 @@ from .views import (
     MarcaViewSet, RubroViewSet, SubrubroViewSet, ColorViewSet, ComprobanteViewSet,
     RevendedorViewSet, ClientesViewSet, ArticuloViewSet,
     UsuarioViewSet, PedidosViewSet, CondicionIvaViewSet, StockViewSet,
-    ConfirmacionVentaViewSet, GeneralViewSet, importar_datos,
-    get_revendedor_logo, upload_revendedor_logo, delete_revendedor_logo
+    ConfirmacionVentaViewSet, GeneralViewSet, FiltroRevendedorViewSet, ValorFiltroStockViewSet,
+    importar_datos, get_revendedor_logo, upload_revendedor_logo, delete_revendedor_logo
 )
 
 # 👇 CLAVE: agregar trailing_slash opcional
@@ -43,6 +43,10 @@ router.register(r'pedidos', PedidosViewSet, basename='pedido')
 # Configuración
 router.register(r'usuarios', UsuarioViewSet, basename='usuario')
 router.register(r'general', GeneralViewSet, basename='general')
+
+# Filtros personalizados
+router.register(r'filtros-revendedor', FiltroRevendedorViewSet, basename='filtro-revendedor')
+router.register(r'valores-filtro-stock', ValorFiltroStockViewSet, basename='valor-filtro-stock')
 
 urlpatterns = [
     path('', include(router.urls)),

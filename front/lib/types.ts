@@ -103,6 +103,7 @@ export interface Stock {
   art_sucd?: number
   art_desa?: number
   art_bdis?: string
+  valores_filtros?: ValorFiltroStock[]  // NUEVO: valores de filtros personalizados
   stk_fcre: string
   stk_fmod: string
 }
@@ -243,4 +244,30 @@ export interface PaginatedResponse<T> {
   page: number
   pageSize: number
   hasMore: boolean
+}
+
+// ================================================================
+// FILTROS PERSONALIZADOS
+// ================================================================
+
+export interface FiltroRevendedor {
+  fr_codi: number
+  rev_codi: number
+  rev_nomb?: string
+  fr_nomb: string
+  fr_tipo: string
+  fr_desc?: string
+  fr_fcre?: string
+  fr_fmod?: string
+}
+
+export interface ValorFiltroStock {
+  vfs_codi: number
+  stk_codi: number
+  stk_codi_display?: string
+  fr_codi: number
+  fr_nomb?: string
+  vfs_valor: string
+  vfs_fcre?: string
+  vfs_fmod?: string
 }

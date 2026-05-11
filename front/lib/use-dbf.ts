@@ -12,6 +12,8 @@ import {
   CondicionIva,
   Comprobante,
   Stock,
+  FiltroRevendedor,
+  ValorFiltroStock,
 } from './types'
 
 // Configuración de la API
@@ -388,16 +390,17 @@ export async function generarPDFPedidoGuardado(
       return num.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' })
     }
 
-    // HTML EXACTAMENTE IGUAL a vista-previa.tsx
+    // HTML ACTUALIZADO CON ORDEN DE VENTA
     const html = `
     <!DOCTYPE html>
     <html>
     <head>
-      <title>Pedido de Facturación - ${codigoExistente}</title>
+      <title>Orden de Venta - ${codigoExistente}</title>
+      <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital@0;1&display=swap" rel="stylesheet">
       <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
-          font-family: 'Arial', sans-serif; 
+          font-family: 'Open Sans', sans-serif; 
           padding: 15px; 
           color: #333; 
           font-size: 10px; 
@@ -431,14 +434,16 @@ export async function generarPDFPedidoGuardado(
           padding-top: 30px;
         }
         .header-center h1 {
-          font-size: 13px;
+          font-size: 35px;
           font-weight: bold;
           margin-bottom: 2px;
+          letter-spacing: 1px;
         }
         .header-center p {
-          font-size: 9px;
+          font-size: 12px;
           color: #666;
           margin: 1px 0;
+          font-weight: bold;
         }
         .header-right {
           text-align: right;
@@ -453,29 +458,180 @@ export async function generarPDFPedidoGuardado(
           color: #666;
         }
         .section {
-          margin-bottom: 10px;
+          margin-bottom: 12px;
         }
         .section-title {
-          font-size: 9px;
+          font-size: 11px;
           font-weight: bold;
           text-transform: uppercase;
           background-color: #f5f5f5;
           padding: 3px 4px;
-          margin-bottom: 4px;
+          margin-bottom: 6px;
           border-bottom: 1px solid #333;
         }
         .data-row {
           display: flex;
-          margin-bottom: 2px;
+          margin-bottom: 4px;
+          align-items: center;
         }
         .label {
-          width: 110px;
+          width: 130px;
           font-weight: bold;
-          font-size: 9px;
+          font-size: 13px;
         }
         .value {
           flex: 1;
-          font-size: 9px;
+          font-size: 13px;
+          text-align: left;
+          padding-left: 10px;
+        }
+        .value.large {
+          font-size: 14px;
+          font-weight: 600;
+          font-style: italic;
+        }
+        .top-datos {
+          display: grid;
+          grid-template-columns: 1fr 1fr 1fr;
+          gap: 0;
+          padding-bottom: 8px;
+          margin-bottom: 8px;
+          border-bottom: 1px solid #ccc;
+        }
+        .top-datos .data-row {
+          flex-direction: column;
+          margin-bottom: 0;
+        }
+        .top-datos > :first-child {
+          justify-self: start;
+        }
+        .top-datos > :nth-child(2) {
+          justify-self: center;
+        }
+        .top-datos > :nth-child(3) {
+          justify-self: end;
+        }
+        .top-datos .label {
+          width: auto;
+          margin-bottom: 2px;
+        }
+        .top-datos .value {
+          padding-left: 0;
+        }
+        .horizontal-row {
+          display: grid;
+          grid-template-columns: 1fr 2.5fr 1fr 1fr;
+          gap: 0;
+          margin-bottom: 8px;
+        }
+        .horizontal-row .data-row {
+          flex-direction: column;
+          margin-bottom: 0;
+        }
+        .horizontal-row > :first-child {
+          justify-self: start;
+        }
+        .horizontal-row > :nth-child(2) {
+          justify-self: center;
+        }
+        .horizontal-row > :nth-child(3) {
+          justify-self: center;
+        }
+        .horizontal-row > :nth-child(4) {
+          justify-self: end;
+        }
+        .horizontal-row .label {
+          width: auto;
+          margin-bottom: 2px;
+        }
+        .horizontal-row .value {
+          padding-left: 0;
+        }
+        .conyuge-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr 1fr;
+          gap: 0;
+          margin-bottom: 4px;
+        }
+        .conyuge-row .data-row {
+          flex-direction: column;
+          margin-bottom: 0;
+        }
+        .conyuge-row > :first-child {
+          justify-self: start;
+        }
+        .conyuge-row > :nth-child(2) {
+          justify-self: center;
+        }
+        .conyuge-row > :nth-child(3) {
+          justify-self: end;
+        }
+        .conyuge-row .label {
+          width: auto;
+          font-weight: bold;
+          font-size: 13px;
+          margin-bottom: 0;
+        }
+        .conyuge-row .value {
+          font-size: 13px;
+          text-align: left;
+          padding-left: 10px;
+        }
+        .forma-pago-section {
+          margin-top: 20px;
+        }
+        .forma-pago-grid {
+          display: grid;
+          grid-template-columns: repeat(5, 1fr);
+          gap: 6px;
+          margin-top: 12px;
+        }
+        .forma-pago-item {
+          border: 1px solid #333;
+          padding: 5px;
+          text-align: center;
+          min-height: 48px;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+        }
+        .forma-pago-label {
+          font-size: 15px;
+          font-weight: bold;
+          margin-bottom: 2px;
+        }
+        .forma-pago-valor {
+          font-size: 15px;
+          font-weight: bold;
+        }
+        .firmas {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 40px;
+          margin-top: 80px;
+          padding-top: 20px;
+        }
+        .firmas.sin-conyuge {
+          margin-top: 80px;
+        }
+        .firma-item {
+          text-align: center;
+        }
+        .firma-linea {
+          border-top: 1px solid #333;
+          margin-bottom: 8px;
+          height: 4px;
+        }
+        .firma-label {
+          font-size: 11px;
+          font-weight: bold;
+        }
+        .brixsoftware {
+          text-align: right;
+          font-size: 8px;
+          color: #999;
+          margin-top: 8px;
+          padding-right: 0;
         }
         .footer {
           margin-top: 8px;
@@ -485,18 +641,13 @@ export async function generarPDFPedidoGuardado(
           border-top: 1px solid #ddd;
           padding-top: 3px;
         }
-        .importe-credito {
-          font-weight: bold;
-          font-size: 10px;
-        }
       </style>
     </head>
     <body>
       <div class="header">
         ${logoBase64 ? `<div class="header-logo"><img src="${logoBase64}" alt="Logo" /></div>` : '<div class="header-logo"></div>'}
         <div class="header-center">
-          <h1>PEDIDO DE FACTURACIÓN</h1>
-          <p>Centro Motos - BrixSoftware</p>
+          <h1>ORDEN DE VENTA</h1>
           <p>Fecha: ${formatDate(pedido.pov_fech)}</p>
         </div>
         <div class="header-right">
@@ -508,9 +659,11 @@ export async function generarPDFPedidoGuardado(
       <!-- DATOS DEL COMPRADOR -->
       <div class="section">
         <div class="section-title">Datos del Comprador</div>
-        <div class="data-row"><span class="label">Apellido y Nombre:</span><span class="value">${pedido.cli_nomb || '-'}</span></div>
-        <div class="data-row"><span class="label">Documento:</span><span class="value">${pedido.cli_tdoc || ''} ${pedido.cli_ndoc || '-'}</span></div>
-        <div class="data-row"><span class="label">CUIT:</span><span class="value">${pedido.cli_cuit || '-'}</span></div>
+        <div class="top-datos">
+          <div class="data-row"><span class="label">Apellido y Nombre:</span><span class="value large">${pedido.cli_nomb || '-'}</span></div>
+          <div class="data-row"><span class="label">Documento:</span><span class="value large">${pedido.cli_tdoc || ''} ${pedido.cli_ndoc || '-'}</span></div>
+          <div class="data-row"><span class="label">CUIT:</span><span class="value large">${pedido.cli_cuit || '-'}</span></div>
+        </div>
         <div class="data-row"><span class="label">Condición IVA:</span><span class="value">${pedido.civ_nomb || '-'}</span></div>
         <div class="data-row"><span class="label">Dirección:</span><span class="value">${pedido.cli_dire || '-'}</span></div>
         <div class="data-row"><span class="label">Nombre Localidad:</span><span class="value">${pedido.loc_nomb || '-'}</span></div>
@@ -522,39 +675,66 @@ export async function generarPDFPedidoGuardado(
         <div class="data-row"><span class="label">Ocupación:</span><span class="value">${pedido.cli_ocup || '-'}</span></div>
       </div>
 
-      ${pedido.cli_nombc ? `
-      <!-- DATOS DEL CÓNYUGE -->
-      <div class="section">
-        <div class="section-title">Datos del Cónyuge</div>
-        <div class="data-row"><span class="label">Nombre:</span><span class="value">${pedido.cli_nombc || '-'}</span></div>
-        <div class="data-row"><span class="label">Documento:</span><span class="value">${pedido.cli_tdocc || ''} ${pedido.cli_ndocc || '-'}</span></div>
-        <div class="data-row"><span class="label">CUIT:</span><span class="value">${pedido.cli_cuitc || '-'}</span></div>
-      </div>
-      ` : ''}
-
+      <!-- DATOS DEL CÓNYUGE - REMOVIDO DEL PDF -->
+      
       <!-- DATOS DEL VEHÍCULO -->
       <div class="section">
         <div class="section-title">Datos del Vehículo</div>
-        <div class="data-row"><span class="label">Marca:</span><span class="value">${pedido.mar_nomb || '-'}</span></div>
-        <div class="data-row"><span class="label">Artículo:</span><span class="value">${pedido.art_nomb || '-'}</span></div>
-        <div class="data-row"><span class="label">Modelo:</span><span class="value">${pedido.pov_mode || '-'}</span></div>
-        <div class="data-row"><span class="label">Color:</span><span class="value">${pedido.col_nomb || '-'}</span></div>
+        <div class="horizontal-row">
+          <div class="data-row"><span class="label">Marca:</span><span class="value large">${pedido.mar_nomb || '-'}</span></div>
+          <div class="data-row"><span class="label">Modelo:</span><span class="value large">${pedido.art_nomb || '-'}</span></div>
+          <div class="data-row"><span class="label">Año:</span><span class="value large">${pedido.pov_mode || '-'}</span></div>
+          <div class="data-row"><span class="label">Color:</span><span class="value large">${pedido.col_nomb || '-'}</span></div>
+        </div>
         <div class="data-row"><span class="label">Nro Chasis:</span><span class="value">${pedido.pov_ncha || '-'}</span></div>
         <div class="data-row"><span class="label">Nro Motor:</span><span class="value">${pedido.pov_nmot || '-'}</span></div>
         <div class="data-row"><span class="label">Nro Certificado:</span><span class="value">${pedido.pov_ncer || '-'}</span></div>
       </div>
 
       <!-- FORMA DE PAGO -->
-      <div class="section">
+      <div class="section forma-pago-section">
         <div class="section-title">Forma de Pago</div>
         <div class="data-row"><span class="label">Tipo Factura:</span><span class="value">${pedido.com_nomb || '-'} ${pedido.com_letr || '-'}</span></div>
         <div class="data-row"><span class="label">Financiera:</span><span class="value">${pedido.pov_finu || '-'}</span></div>
-        <div class="data-row importe-credito"><span class="label">Importe Crédito:</span><span class="value">${formatCurrency(pedido.pov_impc)}</span></div>
-        <div class="data-row"><span class="label">Tarjeta de Crédito:</span><span class="value">${formatCurrency(pedido.pov_tarc)}</span></div>
-        <div class="data-row"><span class="label">Contado:</span><span class="value">${formatCurrency(pedido.pov_cont)}</span></div>
-        <div class="data-row"><span class="label">Transferencia:</span><span class="value">${formatCurrency(pedido.pov_tran)}</span></div>
-        <div class="data-row"><span class="label">Cheques:</span><span class="value">${formatCurrency(pedido.pov_cheq)}</span></div>
+        <div class="data-row"><span class="label">Nro de Crédito:</span><span class="value">${pedido.pov_numc || '-'}</span></div>
+        
+        <div class="forma-pago-grid">
+          <div class="forma-pago-item">
+            <div class="forma-pago-label">Importe Crédito</div>
+            <div class="forma-pago-valor">${formatCurrency(pedido.pov_impc)}</div>
+          </div>
+          <div class="forma-pago-item">
+            <div class="forma-pago-label">T. de Crédito</div>
+            <div class="forma-pago-valor">${formatCurrency(pedido.pov_tarc)}</div>
+          </div>
+          <div class="forma-pago-item">
+            <div class="forma-pago-label">Contado</div>
+            <div class="forma-pago-valor">${formatCurrency(pedido.pov_cont)}</div>
+          </div>
+          <div class="forma-pago-item">
+            <div class="forma-pago-label">Transferencia</div>
+            <div class="forma-pago-valor">${formatCurrency(pedido.pov_tran)}</div>
+          </div>
+          <div class="forma-pago-item">
+            <div class="forma-pago-label">Cheques</div>
+            <div class="forma-pago-valor">${formatCurrency(pedido.pov_cheq)}</div>
+          </div>
+        </div>
       </div>
+
+      <!-- FIRMAS -->
+      <div class="firmas ${pedido.cli_nombc ? '' : 'sin-conyuge'}">
+        <div class="firma-item">
+          <div class="firma-linea"></div>
+          <div class="firma-label">Firma Vendedor</div>
+        </div>
+        <div class="firma-item">
+          <div class="firma-linea"></div>
+          <div class="firma-label">Firma Cliente</div>
+        </div>
+      </div>
+
+      <div class="brixsoftware">BrixSoftware</div>
 
       <div class="footer">
         <p>Documento generado el ${new Date().toLocaleString('es-AR')}</p>
@@ -665,6 +845,7 @@ export interface StockFiltros {
   busqueda?: string
   marcaCodi?: number | null
   subrubroCodi?: number | null
+  filtrosSeleccionados?: Record<number, string>  // MÚLTIPLES FILTROS: { fr_codi: valor }
 }
 
 /**
@@ -672,11 +853,23 @@ export interface StockFiltros {
  * Los filtros se aplican en el backend via query params
  */
 export function useStockMotocicletas(filtros: StockFiltros) {
-  const [stockMotocicletas, setStockMotocicletas] = useState<(Stock & { descripcion?: string; color?: string })[]>([])
+  const [stockMotocicletas, setStockMotocicletas] = useState<(Stock & { 
+    descripcion?: string; 
+    color?: string;
+    marca?: string;
+    subrubro?: string;
+    codigoArticulo?: string;
+    chassis?: string;
+    motor?: string;
+    certificado?: string;
+    modelo?: string;
+    colorNombre?: string;
+    valores_filtros?: any[];
+  })[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const { revendedorDestino, busqueda, marcaCodi, subrubroCodi } = filtros
+  const { revendedorDestino, busqueda, marcaCodi, subrubroCodi, filtrosSeleccionados } = filtros
 
   useEffect(() => {
     let activo = true
@@ -692,6 +885,10 @@ export function useStockMotocicletas(filtros: StockFiltros) {
         if (busqueda && busqueda.trim()) params.set('search', busqueda.trim())
         if (marcaCodi) params.set('art_codi__mar_codi', String(marcaCodi))
         if (subrubroCodi) params.set('art_codi__sru_codi', String(subrubroCodi))
+        // MÚLTIPLES FILTROS: pasar como JSON
+        if (filtrosSeleccionados && Object.keys(filtrosSeleccionados).length > 0) {
+          params.set('filtros_seleccionados', JSON.stringify(filtrosSeleccionados))
+        }
 
         const qs = params.toString()
         const endpoint = `/stock/${qs ? `?${qs}` : ''}`
@@ -711,6 +908,8 @@ export function useStockMotocicletas(filtros: StockFiltros) {
           certificado: item.art_ncer || '',
           modelo: item.art_mode || '',
           colorNombre: item.col_nomb || '',
+          // NUEVO: valores de filtros
+          valores_filtros: item.valores_filtros || [],
         }))
 
         setStockMotocicletas(enrichedData)
@@ -732,7 +931,7 @@ export function useStockMotocicletas(filtros: StockFiltros) {
       activo = false
       clearInterval(interval)
     }
-  }, [revendedorDestino, busqueda, marcaCodi, subrubroCodi])
+  }, [revendedorDestino, busqueda, marcaCodi, subrubroCodi, filtrosSeleccionados])
 
   return { stockMotocicletas, loading, error }
 }
@@ -1089,6 +1288,226 @@ export function useGeneral() {
   }, [])
 
   return { general, loading, error }
+}
+
+/* =========================================================
+   FILTROS PERSONALIZADOS
+========================================================= */
+
+/**
+ * Hook para obtener los filtros personalizados de un revendedor
+ */
+export function useFiltrosRevendedor(revCodi: number | null) {
+  const [filtros, setFiltros] = useState<FiltroRevendedor[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!revCodi || revCodi <= 0) {
+      setFiltros([])
+      setLoading(false)
+      return
+    }
+
+    let activo = true
+
+    const loadFiltros = async () => {
+      try {
+        const endpoint = `${API_URL}/filtros-revendedor/?rev_codi=${revCodi}`
+        const response = await fetch(endpoint)
+        
+        if (!response.ok) {
+          throw new Error(`Error ${response.status}`)
+        }
+        
+        const data = await response.json()
+        const filtrosArray = Array.isArray(data) ? data : data.results || []
+        
+        if (activo) {
+          setFiltros(filtrosArray)
+          setError(null)
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Error desconocido'
+        if (activo) setError(message)
+      } finally {
+        if (activo) setLoading(false)
+      }
+    }
+
+    loadFiltros()
+
+    // Polling cada 5 segundos
+    const interval = setInterval(loadFiltros, 5000)
+
+    return () => {
+      activo = false
+      clearInterval(interval)
+    }
+  }, [revCodi])
+
+  return { filtros, loading, error, reloadFiltros: () => {} }
+}
+
+/**
+ * Crear un nuevo filtro personalizado para el revendedor
+ */
+export async function crearFiltroRevendedor(
+  revCodi: number,
+  nombreFiltro: string,
+  tipoFiltro: string = 'custom'
+): Promise<{ success: boolean; error?: string; filtro?: FiltroRevendedor }> {
+  try {
+    const response = await fetch(`${API_URL}/filtros-revendedor/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        rev_codi: revCodi,
+        fr_nomb: nombreFiltro,
+        fr_tipo: tipoFiltro,
+      }),
+    })
+
+    if (!response.ok) {
+      const error = await response.json()
+      return { success: false, error: error.detail || JSON.stringify(error) }
+    }
+
+    const filtro = await response.json()
+    return { success: true, filtro }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Error desconocido'
+    return { success: false, error: message }
+  }
+}
+
+/**
+ * Eliminar un filtro personalizado (y todos sus valores asociados)
+ */
+export async function eliminarFiltroRevendedor(
+  filtroCodi: number
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const response = await fetch(`${API_URL}/filtros-revendedor/${filtroCodi}/`, {
+      method: 'DELETE',
+    })
+
+    if (!response.ok && response.status !== 204) {
+      const error = await response.json()
+      return { success: false, error: error.detail || JSON.stringify(error) }
+    }
+
+    return { success: true }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Error desconocido'
+    return { success: false, error: message }
+  }
+}
+
+/**
+ * Actualizar el nombre de un filtro personalizado
+ */
+export async function actualizarFiltroRevendedor(
+  filtroCodi: number,
+  nuevoNombre: string
+): Promise<{ success: boolean; error?: string; filtro?: FiltroRevendedor }> {
+  try {
+    const response = await fetch(`${API_URL}/filtros-revendedor/${filtroCodi}/`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fr_nomb: nuevoNombre,
+      }),
+    })
+
+    if (!response.ok) {
+      const error = await response.json()
+      return { success: false, error: error.detail || error.fr_nomb?.[0] || JSON.stringify(error) }
+    }
+
+    const filtro = await response.json()
+    return { success: true, filtro }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Error desconocido'
+    return { success: false, error: message }
+  }
+}
+
+/**
+ * Obtener los valores únicos de un filtro (para mostrar en el dropdown)
+ */
+export async function obtenerValoresFiltro(
+  filtroCodi: number
+): Promise<{ success: boolean; valores?: string[]; error?: string }> {
+  try {
+    const response = await fetch(`${API_URL}/filtros-revendedor/${filtroCodi}/valores/`)
+
+    if (!response.ok) {
+      return { success: false, error: `Error ${response.status}` }
+    }
+
+    const data = await response.json()
+    return { success: true, valores: data.valores || [] }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Error desconocido'
+    return { success: false, error: message }
+  }
+}
+
+/**
+ * Crear un filtro con motos seleccionadas (asignación bulk)
+ * Crea el FiltroRevendedor y ValorFiltroStock para cada moto seleccionada
+ */
+export async function crearFiltroConMotos(
+  revCodi: number,
+  nombreFiltro: string,
+  motosSeleccionadas: number[]
+): Promise<{ success: boolean; error?: string; filtro?: FiltroRevendedor }> {
+  try {
+    // Paso 1: Crear el filtro
+    const filtroResponse = await fetch(`${API_URL}/filtros-revendedor/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        rev_codi: revCodi,
+        fr_nomb: nombreFiltro,
+        fr_tipo: 'custom',
+      }),
+    })
+
+    if (!filtroResponse.ok) {
+      const error = await filtroResponse.json()
+      return { success: false, error: error.detail || JSON.stringify(error) }
+    }
+
+    const filtro = await filtroResponse.json()
+    const frCodi = filtro.fr_codi
+
+    // Paso 2: Crear ValorFiltroStock para cada moto
+    const valoresPayload = motosSeleccionadas.map(stkCodi => ({
+      stk_codi: stkCodi,
+      fr_codi: frCodi,
+      vfs_valor: nombreFiltro,
+    }))
+
+    for (const valor of valoresPayload) {
+      const valorResponse = await fetch(`${API_URL}/valores-filtro-stock/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(valor),
+      })
+
+      if (!valorResponse.ok) {
+        const error = await valorResponse.json()
+        console.warn(`Error asignando moto ${valor.stk_codi}:`, error)
+      }
+    }
+
+    return { success: true, filtro }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Error desconocido'
+    return { success: false, error: message }
+  }
 }
 
 

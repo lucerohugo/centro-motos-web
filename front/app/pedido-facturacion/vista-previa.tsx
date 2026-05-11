@@ -84,11 +84,12 @@ export function VistaPrevia({
       <!DOCTYPE html>
       <html>
       <head>
-        <title>Pedido de Facturación - ${codigoExistente || 'Nuevo'}</title>
+        <title>Orden de Venta - ${codigoExistente || 'Nuevo'}</title>
+        <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital@0;1&display=swap" rel="stylesheet">
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
           body { 
-            font-family: 'Arial', sans-serif; 
+            font-family: 'Open Sans', sans-serif; 
             padding: 15px; 
             color: #333; 
             font-size: 10px; 
@@ -122,14 +123,16 @@ export function VistaPrevia({
             padding-top: 30px;
           }
           .header-center h1 {
-            font-size: 13px;
+            font-size: 35px;
             font-weight: bold;
             margin-bottom: 2px;
+            letter-spacing: 1px;
           }
           .header-center p {
-            font-size: 9px;
+            font-size: 12px;
             color: #666;
             margin: 1px 0;
+            font-weight: bold;
           }
           .header-right {
             text-align: right;
@@ -144,35 +147,180 @@ export function VistaPrevia({
             color: #666;
           }
           .section {
-            margin-bottom: 10px;
+            margin-bottom: 12px;
           }
           .section-title {
-            font-size: 9px;
+            font-size: 11px;
             font-weight: bold;
             text-transform: uppercase;
             background-color: #f5f5f5;
             padding: 3px 4px;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
             border-bottom: 1px solid #333;
-          }
-          .two-column {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 8px;
           }
           .data-row {
             display: flex;
-            margin-bottom: 2px;
+            margin-bottom: 4px;
+            align-items: center;
           }
           .label {
-            width: 110px;
+            width: 130px;
             font-weight: bold;
-            font-size: 9px;
+            font-size: 13px;
           }
           .value {
             flex: 1;
-            font-size: 9px;
+            font-size: 13px;
+            text-align: left;
+            padding-left: 10px;
+          }
+          .value.large {
+            font-size: 14px;
+            font-weight: 600;
+            font-style: italic;
+          }
+          .top-datos {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0;
+            padding-bottom: 8px;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #ccc;
+          }
+          .top-datos .data-row {
+            flex-direction: column;
+            margin-bottom: 0;
+          }
+          .top-datos > :first-child {
+            justify-self: start;
+          }
+          .top-datos > :nth-child(2) {
+            justify-self: center;
+          }
+          .top-datos > :nth-child(3) {
+            justify-self: end;
+          }
+          .top-datos .label {
+            width: auto;
+            margin-bottom: 2px;
+          }
+          .top-datos .value {
+            padding-left: 0;
+          }
+          .horizontal-row {
+            display: grid;
+            grid-template-columns: 1fr 2.5fr 1fr 1fr;
+            gap: 0;
+            margin-bottom: 8px;
+          }
+          .horizontal-row .data-row {
+            flex-direction: column;
+            margin-bottom: 0;
+          }
+          .horizontal-row > :first-child {
+            justify-self: start;
+          }
+          .horizontal-row > :nth-child(2) {
+            justify-self: center;
+          }
+          .horizontal-row > :nth-child(3) {
+            justify-self: center;
+          }
+          .horizontal-row > :nth-child(4) {
+            justify-self: end;
+          }
+          .horizontal-row .label {
+            width: auto;
+            margin-bottom: 2px;
+          }
+          .horizontal-row .value {
+            padding-left: 0;
+          }
+          .conyuge-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0;
+            margin-bottom: 4px;
+          }
+          .conyuge-row .data-row {
+            flex-direction: column;
+            margin-bottom: 0;
+          }
+          .conyuge-row > :first-child {
+            justify-self: start;
+          }
+          .conyuge-row > :nth-child(2) {
+            justify-self: center;
+          }
+          .conyuge-row > :nth-child(3) {
+            justify-self: end;
+          }
+          .conyuge-row .label {
+            width: auto;
+            font-weight: bold;
+            font-size: 13px;
+            margin-bottom: 0;
+          }
+          .conyuge-row .value {
+            font-size: 13px;
+            text-align: left;
+            padding-left: 10px;
+          }
+          .forma-pago-section {
+            margin-top: 20px;
+          }
+          .forma-pago-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            margin-top: 12px;
+          }
+          .forma-pago-item {
+            border: 1px solid #333;
+            padding: 5px;
+            text-align: center;
+            min-height: 48px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+          }
+          .forma-pago-label {
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 2px;
+          }
+          .forma-pago-valor {
+            font-size: 15px;
+            font-weight: bold;
+          }
+          .firmas {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 50px;
+            padding-top: 20px;
+          }
+          .firmas.sin-conyuge {
+            margin-top: 100px;
+          }
+          .firma-item {
+            text-align: center;
+          }
+          .firma-linea {
+            border-top: 1px solid #333;
+            margin-bottom: 8px;
+            height: 4px;
+          }
+          .firma-label {
+            font-size: 11px;
+            font-weight: bold;
+          }
+          .brixsoftware {
+            text-align: right;
+            font-size: 8px;
+            color: #999;
+            margin-top: 8px;
+            padding-right: 0;
           }
           .footer {
             margin-top: 8px;
@@ -182,18 +330,13 @@ export function VistaPrevia({
             border-top: 1px solid #ddd;
             padding-top: 3px;
           }
-          .importe-credito {
-            font-weight: bold;
-            font-size: 10px;
-          }
         </style>
       </head>
       <body>
         <div class="header">
           ${logoBase64 ? `<div class="header-logo"><img src="${logoBase64}" alt="Logo" /></div>` : '<div class="header-logo"></div>'}
           <div class="header-center">
-            <h1>PEDIDO DE FACTURACIÓN</h1>
-            <p>Centro Motos - BrixSoftware</p>
+            <h1>ORDEN DE VENTA</h1>
             <p>Fecha: ${formatDate(pedidoData.fecha)}</p>
           </div>
           <div class="header-right">
@@ -205,63 +348,80 @@ export function VistaPrevia({
         <!-- DATOS DEL COMPRADOR -->
         <div class="section">
           <div class="section-title">Datos del Comprador</div>
-          <div class="two-column">
-            <div>
-              <div class="data-row"><span class="label">Apellido y Nombre:</span><span class="value">${datosComprador?.apellidoNombre || '-'}</span></div>
-              <div class="data-row"><span class="label">Documento:</span><span class="value">${datosComprador?.documento || '-'} ${datosComprador?.nroDocumento || '-'}</span></div>
-              <div class="data-row"><span class="label">CUIT:</span><span class="value">${datosComprador?.cuit || '-'}</span></div>
-              <div class="data-row"><span class="label">Condición IVA:</span><span class="value">${datosComprador?.condicionIvaNombre || '-'}</span></div>
-              <div class="data-row"><span class="label">Dirección:</span><span class="value">${datosComprador?.direccion || '-'}</span></div>
-              <div class="data-row"><span class="label">Nombre Localidad:</span><span class="value">${datosComprador?.localidadNombre || '-'}</span></div>
-            </div>
-            <div>
-              <div class="data-row"><span class="label">Teléfono:</span><span class="value">${datosComprador?.telefono || '-'}</span></div>
-              <div class="data-row"><span class="label">Celular:</span><span class="value">${datosComprador?.celular || '-'}</span></div>
-              <div class="data-row"><span class="label">Email:</span><span class="value">${datosComprador?.email || '-'}</span></div>
-              <div class="data-row"><span class="label">Fecha Nacimiento:</span><span class="value">${formatDate(datosComprador?.fechaNacimiento)}</span></div>
-              <div class="data-row"><span class="label">Estado Civil:</span><span class="value">${datosComprador?.estadoCivil || '-'}</span></div>
-              <div class="data-row"><span class="label">Ocupación:</span><span class="value">${datosComprador?.ocupacion || '-'}</span></div>
-            </div>
+          <div class="top-datos">
+            <div class="data-row"><span class="label">Apellido y Nombre:</span><span class="value large">${datosComprador?.apellidoNombre || '-'}</span></div>
+            <div class="data-row"><span class="label">Documento:</span><span class="value large">${datosComprador?.documento || '-'} ${datosComprador?.nroDocumento || '-'}</span></div>
+            <div class="data-row"><span class="label">CUIT:</span><span class="value large">${datosComprador?.cuit || '-'}</span></div>
           </div>
+          <div class="data-row"><span class="label">Condición IVA:</span><span class="value">${datosComprador?.condicionIvaNombre || '-'}</span></div>
+          <div class="data-row"><span class="label">Dirección:</span><span class="value">${datosComprador?.direccion || '-'}</span></div>
+          <div class="data-row"><span class="label">Nombre Localidad:</span><span class="value">${datosComprador?.localidadNombre || '-'}</span></div>
+          <div class="data-row"><span class="label">Teléfono:</span><span class="value">${datosComprador?.telefono || '-'}</span></div>
+          <div class="data-row"><span class="label">Celular:</span><span class="value">${datosComprador?.celular || '-'}</span></div>
+          <div class="data-row"><span class="label">Email:</span><span class="value">${datosComprador?.email || '-'}</span></div>
+          <div class="data-row"><span class="label">Fecha Nacimiento:</span><span class="value">${formatDate(datosComprador?.fechaNacimiento)}</span></div>
+          <div class="data-row"><span class="label">Estado Civil:</span><span class="value">${datosComprador?.estadoCivil || '-'}</span></div>
+          <div class="data-row"><span class="label">Ocupación:</span><span class="value">${datosComprador?.ocupacion || '-'}</span></div>
         </div>
-
-        ${datosConyuge?.apellidoNombre ? `
-        <!-- DATOS DEL CÓNYUGE -->
-        <div class="section">
-          <div class="section-title">Datos del Cónyuge</div>
-          <div class="two-column">
-            <div>
-              <div class="data-row"><span class="label">Nombre:</span><span class="value">${datosConyuge?.apellidoNombre || '-'}</span></div>
-              <div class="data-row"><span class="label">Documento:</span><span class="value">${datosConyuge?.documento || '-'} ${datosConyuge?.nroDocumento || '-'}</span></div>
-              <div class="data-row"><span class="label">CUIT:</span><span class="value">${datosConyuge?.cuit || '-'}</span></div>
-            </div>
-          </div>
-        </div>
-        ` : ''}
 
         <!-- DATOS DEL VEHÍCULO -->
         <div class="section">
           <div class="section-title">Datos del Vehículo</div>
-          <div class="data-row"><span class="label">Marca:</span><span class="value">${datosVehiculo?.selectedMoto?.marca || '-'}</span></div>
-          <div class="data-row"><span class="label">Artículo:</span><span class="value">${datosVehiculo?.selectedMoto?.descripcion || '-'}</span></div>
-          <div class="data-row"><span class="label">Modelo:</span><span class="value">${datosVehiculo?.formData?.modelo || '-'}</span></div>
-          <div class="data-row"><span class="label">Color:</span><span class="value">${datosVehiculo?.selectedMoto?.colorNombre || datosVehiculo?.formData?.color || '-'}</span></div>
+          <div class="horizontal-row">
+            <div class="data-row"><span class="label">Marca:</span><span class="value large">${datosVehiculo?.selectedMoto?.marca || '-'}</span></div>
+            <div class="data-row"><span class="label">Modelo:</span><span class="value large">${datosVehiculo?.selectedMoto?.descripcion || '-'}</span></div>
+            <div class="data-row"><span class="label">Año:</span><span class="value large">${datosVehiculo?.formData?.modelo || '-'}</span></div>
+            <div class="data-row"><span class="label">Color:</span><span class="value large">${datosVehiculo?.selectedMoto?.colorNombre || datosVehiculo?.formData?.color || '-'}</span></div>
+          </div>
           <div class="data-row"><span class="label">Nro Chasis:</span><span class="value">${datosVehiculo?.formData?.nroChasis || '-'}</span></div>
           <div class="data-row"><span class="label">Nro Motor:</span><span class="value">${datosVehiculo?.formData?.nroMotor || '-'}</span></div>
           <div class="data-row"><span class="label">Nro Certificado:</span><span class="value">${datosVehiculo?.formData?.nroCertificado || '-'}</span></div>
         </div>
 
         <!-- FORMA DE PAGO -->
-        <div class="section">
+        <div class="section forma-pago-section">
           <div class="section-title">Forma de Pago</div>
           <div class="data-row"><span class="label">Tipo Factura:</span><span class="value">${formaPago?.comNomb || '-'} ${formaPago?.comLetr || '-'}</span></div>
           <div class="data-row"><span class="label">Financiera:</span><span class="value">${formaPago?.financiera || '-'}</span></div>
-          <div class="data-row importe-credito"><span class="label">Importe Crédito:</span><span class="value">${formatCurrency(formaPago?.importeCredito)}</span></div>
-          <div class="data-row"><span class="label">Tarjeta de Crédito:</span><span class="value">${formatCurrency(formaPago?.tarjetaCredito)}</span></div>
-          <div class="data-row"><span class="label">Contado:</span><span class="value">${formatCurrency(formaPago?.contado)}</span></div>
-          <div class="data-row"><span class="label">Transferencia:</span><span class="value">${formatCurrency(formaPago?.transferencia)}</span></div>
-          <div class="data-row"><span class="label">Cheques:</span><span class="value">${formatCurrency(formaPago?.cheques)}</span></div>
+          <div class="data-row"><span class="label">Nro de Crédito:</span><span class="value">${formaPago?.nroCredito || '-'}</span></div>
+          
+          <div class="forma-pago-grid">
+            <div class="forma-pago-item">
+              <div class="forma-pago-label">Importe Crédito</div>
+              <div class="forma-pago-valor">${formatCurrency(formaPago?.importeCredito)}</div>
+            </div>
+            <div class="forma-pago-item">
+              <div class="forma-pago-label">T. de Crédito</div>
+              <div class="forma-pago-valor">${formatCurrency(formaPago?.tarjetaCredito)}</div>
+            </div>
+            <div class="forma-pago-item">
+              <div class="forma-pago-label">Contado</div>
+              <div class="forma-pago-valor">${formatCurrency(formaPago?.contado)}</div>
+            </div>
+            <div class="forma-pago-item">
+              <div class="forma-pago-label">Transferencia</div>
+              <div class="forma-pago-valor">${formatCurrency(formaPago?.transferencia)}</div>
+            </div>
+            <div class="forma-pago-item">
+              <div class="forma-pago-label">Cheques</div>
+              <div class="forma-pago-valor">${formatCurrency(formaPago?.cheques)}</div>
+            </div>
+          </div>
         </div>
+
+        <!-- FIRMAS -->
+        <div class="firmas ${datosConyuge?.apellidoNombre ? '' : 'sin-conyuge'}">
+          <div class="firma-item">
+            <div class="firma-linea"></div>
+            <div class="firma-label">Firma Vendedor</div>
+          </div>
+          <div class="firma-item">
+            <div class="firma-linea"></div>
+            <div class="firma-label">Firma Cliente</div>
+          </div>
+        </div>
+
+        <div class="brixsoftware">BrixSoftware</div>
 
         <div class="footer">
           <p>Documento generado el ${new Date().toLocaleString('es-AR')}</p>
