@@ -108,3 +108,7 @@ db.sqlite3
 staticfiles/
 media/
 gestion.json
+prueba/
+
+subidaPed.py
+SubInfoASR.py

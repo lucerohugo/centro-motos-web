@@ -146,3 +146,10 @@ db.sqlite3
 staticfiles/
 media/
 gestion.json
+
+
+
+#cosas de pruebas locales ignorar con git 
+prueba/
+subidaPed.py
+SubInfoASR.py

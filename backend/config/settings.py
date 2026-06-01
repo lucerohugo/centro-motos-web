@@ -159,6 +159,7 @@ REST_FRAMEWORK = {
 CORS_ALLOWED_ORIGINS = [
     "https://www.centromotos.com.ar",
     "https://centromotos.com.ar",
+    "https://estadisticas-cm.vercel.app/" #agregado 1/6/26 de estadisticas
 
     "http://localhost:3000", #desp comentar esto una vez termine y pase a produccion 
     "http://127.0.0.1:3000", #esto tamb
