@@ -2,11 +2,11 @@
 
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { ArrowLeft, FileEdit, Lock, RefreshCw, AlertCircle, FileDown } from "lucide-react"
+import { ArrowLeft, FileEdit, Lock, RefreshCw, AlertCircle, FileDown, FileText } from "lucide-react"
 import { useState, useEffect } from "react"
 import { AppHeader } from "@/components/app-header"
 import { ROUTES } from "@/lib/routes.config"
-import { getPedidosRevendedor, PedidoResumen, generarPDFPedidoGuardado } from "@/lib/use-dbf"
+import { getPedidosRevendedor, PedidoResumen, generarPDFPedidoGuardado, descargarGarantia } from "@/lib/use-dbf"
 import { leerRevendedor } from "../selector-revendedor"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
@@ -18,6 +18,8 @@ export default function MisPedidosPage() {
   const [pedidos, setPedidos] = useState<PedidoResumen[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [exportandoPDF, setExportandoPDF] = useState<number | null>(null)
+  const [descargandoGarantia, setDescargandoGarantia] = useState<number | null>(null)
 
   useEffect(() => {
     const saved = leerRevendedor()
@@ -91,8 +93,6 @@ export default function MisPedidosPage() {
     }).format(monto)
   }
 
-  const [exportandoPDF, setExportandoPDF] = useState<number | null>(null)
-
   const handleExportarPDF = async (pedido: PedidoResumen) => {
     setExportandoPDF(pedido.codigo)
     
@@ -110,9 +110,24 @@ export default function MisPedidosPage() {
     }
   }
 
+  const handleDescargarGarantia = async (pedido: PedidoResumen) => {
+    setDescargandoGarantia(pedido.codigo)
+    
+    try {
+      const result = await descargarGarantia(pedido.codigo)
+      if (!result.success) {
+        setError(result.error || 'Error al descargar la garantía')
+      }
+    } catch (err) {
+      setError('Error al descargar la garantía')
+    } finally {
+      setDescargandoGarantia(null)
+    }
+  }
+
   return (
     <main className="min-h-screen bg-background px-4 md:px-6 py-8">
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-7xl">
         <AppHeader />
         
         <Link
@@ -148,9 +163,9 @@ export default function MisPedidosPage() {
           </div>
 
           {error && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
+            <Alert variant="destructive" className="mb-4 bg-red-50 dark:bg-red-950 border-red-500 dark:border-red-600 text-red-900 dark:text-red-100">
+              <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
+              <AlertDescription className="text-red-800 dark:text-red-50">{error}</AlertDescription>
             </Alert>
           )}
 
@@ -227,6 +242,15 @@ export default function MisPedidosPage() {
                           >
                             <FileDown className={`h-3 w-3 ${exportandoPDF === pedido.codigo ? 'animate-pulse' : ''}`} />
                             <span className="hidden sm:inline">PDF</span>
+                          </button>
+                          <button
+                            onClick={() => handleDescargarGarantia(pedido)}
+                            disabled={descargandoGarantia === pedido.codigo}
+                            className="inline-flex items-center gap-1 h-8 px-2 md:px-3 rounded text-xs font-medium transition-all bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50"
+                            title="Descargar Garantía"
+                          >
+                            <FileText className={`h-3 w-3 ${descargandoGarantia === pedido.codigo ? 'animate-pulse' : ''}`} />
+                            <span className="hidden sm:inline">Garantía</span>
                           </button>
                           <button
                             onClick={() => handleEditarPedido(pedido)}

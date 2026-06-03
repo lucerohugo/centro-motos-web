@@ -448,6 +448,92 @@ class PedidosViewSet(BaseViewSet):
             'updated_count': updated_count,
             'timestamp': timezone.now().isoformat()
         }, status=status.HTTP_200_OK)
+    
+    @action(detail=True, methods=['get'])
+    def generar_garantia(self, request, pk=None):
+        """
+        Genera un documento de garantía relleno con datos del pedido.
+        
+        GET /api/gestion/pedidos/{id}/generar_garantia/
+        
+        Response: Archivo Word descargable
+        
+        Requisitos:
+        - El pedido debe tener artículo asignado con marca válida
+        - Debe existir archivo de garantía para esa marca
+        """
+        from garantias.garantias_service import (
+            rellenar_garantia,
+            generar_nombre_archivo
+        )
+        from urllib.parse import quote
+        import logging
+        
+        logger = logging.getLogger(__name__)
+        
+        try:
+            # Obtener pedido con relaciones necesarias cargadas
+            pedido = self.queryset.select_related(
+                'pov_arti',
+                'pov_arti__mar_codi'
+            ).get(pk=pk)
+            
+            logger.info(f"Procesando garantía para pedido {pedido.pov_codi}")
+            
+            # Validar que tenga artículo
+            if not pedido.pov_arti:
+                return Response(
+                    {'error': 'El pedido no tiene vehículo asignado'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Validar que tenga marca
+            if not pedido.pov_arti.mar_codi_id:
+                return Response(
+                    {'error': 'El pedido no tiene marca de vehículo asignada'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Generar documento Word relleno - ahora retorna (doc, marca_nombre)
+            doc_bytes, marca_nombre = rellenar_garantia(pedido)
+            
+            # Generar nombre del archivo con la marca
+            nombre_archivo = generar_nombre_archivo(pedido, marca_nombre)
+            
+            logger.info(f"Generando archivo: {nombre_archivo}")
+            
+            # Devolver archivo para descargar con nombre correcto
+            response = FileResponse(
+                doc_bytes,
+                content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            )
+            
+            # Codificar el nombre del archivo correctamente para el header
+            # Usar RFC 5987 para máxima compatibilidad
+            nombre_encoded = quote(nombre_archivo, safe='')
+            response['Content-Disposition'] = f'attachment; filename="{nombre_archivo}"; filename*=UTF-8\'\'{nombre_encoded}'
+            
+            logger.info(f"Content-Disposition header: {response['Content-Disposition']}")
+            
+            return response
+            
+        except Pedidos.DoesNotExist:
+            return Response(
+                {'error': f'Pedido {pk} no encontrado'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except ValueError as e:
+            logger.error(f"Error generando garantía: {str(e)}")
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            logger.exception(f"Error inesperado generando garantía: {str(e)}")
+            return Response(
+                {'error': f'Error al generar garantía: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 # ================================================================

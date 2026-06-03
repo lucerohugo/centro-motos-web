@@ -364,6 +364,18 @@ export function VistaPrevia({
           <div class="data-row"><span class="label">Ocupación:</span><span class="value">${datosComprador?.ocupacion || '-'}</span></div>
         </div>
 
+        ${datosConyuge?.apellidoNombre ? `
+        <!-- DATOS DEL CÓNYUGE -->
+        <div class="section">
+          <div class="section-title">Datos del Cónyuge</div>
+          <div class="conyuge-row">
+            <div class="data-row"><span class="label">Nombre:</span><span class="value">${datosConyuge?.apellidoNombre || '-'}</span></div>
+            <div class="data-row"><span class="label">Documento:</span><span class="value">${datosConyuge?.documento || '-'} ${datosConyuge?.nroDocumento || '-'}</span></div>
+            <div class="data-row"><span class="label">CUIT:</span><span class="value">${datosConyuge?.cuit || '-'}</span></div>
+          </div>
+        </div>
+        ` : ''}
+
         <!-- DATOS DEL VEHÍCULO -->
         <div class="section">
           <div class="section-title">Datos del Vehículo</div>

@@ -608,11 +608,11 @@ export async function generarPDFPedidoGuardado(
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 40px;
-          margin-top: 80px;
+          margin-top: 50px;
           padding-top: 20px;
         }
         .firmas.sin-conyuge {
-          margin-top: 80px;
+          margin-top: 100px;
         }
         .firma-item {
           text-align: center;
@@ -675,8 +675,18 @@ export async function generarPDFPedidoGuardado(
         <div class="data-row"><span class="label">Ocupación:</span><span class="value">${pedido.cli_ocup || '-'}</span></div>
       </div>
 
-      <!-- DATOS DEL CÓNYUGE - REMOVIDO DEL PDF -->
-      
+      ${pedido.cli_nombc ? `
+      <!-- DATOS DEL CÓNYUGE -->
+      <div class="section">
+        <div class="section-title">Datos del Cónyuge</div>
+        <div class="conyuge-row">
+          <div class="data-row"><span class="label">Nombre:</span><span class="value">${pedido.cli_nombc || '-'}</span></div>
+          <div class="data-row"><span class="label">Documento:</span><span class="value">${pedido.cli_tdocc || ''} ${pedido.cli_ndocc || '-'}</span></div>
+          <div class="data-row"><span class="label">CUIT:</span><span class="value">${pedido.cli_cuitc || '-'}</span></div>
+        </div>
+      </div>
+      ` : ''}
+
       <!-- DATOS DEL VEHÍCULO -->
       <div class="section">
         <div class="section-title">Datos del Vehículo</div>
@@ -1510,5 +1520,68 @@ export async function crearFiltroConMotos(
   }
 }
 
+/* =========================================================
+   GARANTÍAS - Descargar documento Word relleno
+========================================================= */
+
+/**
+ * Descargar documento de garantía relleno para un pedido
+ * 
+ * @param pedidoCodi - ID del pedido
+ * @returns Promise con resultado de descarga
+ */
+export async function descargarGarantia(pedidoCodi: number): Promise<{ success: boolean; error?: string }> {
+  try {
+    const response = await fetch(`${API_URL}/pedidos/${pedidoCodi}/generar_garantia/`)
+    
+    // Si hay error HTTP, procesar respuesta JSON
+    if (!response.ok) {
+      try {
+        const errorData = await response.json()
+        return { success: false, error: errorData.error || 'Error al generar garantía' }
+      } catch {
+        return { success: false, error: response.statusText || 'Error al generar garantía' }
+      }
+    }
+
+    // Si es éxito, descargar el archivo
+    const blob = await response.blob()
+    
+    // Obtener nombre del archivo del header Content-Disposition
+    const contentDisposition = response.headers.get('content-disposition')
+    let nombreArchivo = 'Garantia.docx'
+    
+    if (contentDisposition) {
+      // Intentar capturar filename="value" o filename=value
+      const patterns = [
+        /filename="([^"]+)"/,                 // filename="value"
+        /filename=([^;]+)/                    // filename=value
+      ]
+      
+      for (const pattern of patterns) {
+        const match = contentDisposition.match(pattern)
+        if (match && match[1]) {
+          nombreArchivo = match[1].trim()
+          break
+        }
+      }
+    }
+
+    // Descargar archivo
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = nombreArchivo
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+
+    return { success: true }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Error desconocido'
+    return { success: false, error: message }
+  }
+}
 
 

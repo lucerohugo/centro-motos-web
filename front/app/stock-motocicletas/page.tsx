@@ -146,7 +146,7 @@ export default function StockMotocicletasPage() {
 
   // Manejador para guardar motos seleccionadas en el filtro
   const handleGuardarMotosDelFiltro = async () => {
-    if (!filtroEnSeleccion || !hayChangesEnMotos()) {
+    if (!filtroEnSeleccion || Object.keys(motosSeleccionadas).length === 0) {
       return
     }
 
@@ -154,7 +154,7 @@ export default function StockMotocicletasPage() {
     
     try {
       if (filtroEditando) {
-        // Modo EDICIÓN: Separar motos nuevas vs existentes que cambiaron de valor vs eliminadas
+        // Modo EDICIÓN: Separar motos nuevas vs existentes que cambiaron de valor
         
         // Motos completamente NUEVAS (no existen en motosExistentesFiltro)
         const motosNuevas = Object.entries(motosSeleccionadas).filter(([stkCodiStr]) => {
@@ -166,11 +166,6 @@ export default function StockMotocicletasPage() {
           const stkCodi = parseInt(stkCodiStr)
           const valorAnterior = motosExistentesFiltro[stkCodi]
           return stkCodi in motosExistentesFiltro && valorAnterior !== nuevoValor
-        })
-        
-        // Motos ELIMINADAS (existían pero ya no están seleccionadas)
-        const motosEliminadas = Object.entries(motosExistentesFiltro).filter(([stkCodiStr]) => {
-          return !(parseInt(stkCodiStr) in motosSeleccionadas)
         })
         
         // Guardar motos nuevas con POST
@@ -198,17 +193,6 @@ export default function StockMotocicletasPage() {
               body: JSON.stringify({
                 vfs_valor: nuevoValor || 'sin asignar',
               }),
-            })
-          }
-        }
-        
-        // Eliminar motos con DELETE
-        for (const [stkCodiStr] of motosEliminadas) {
-          const stkCodi = parseInt(stkCodiStr)
-          const vfsCodi = valoresExistentesIds[stkCodi]
-          if (vfsCodi) {
-            await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/gestion/valores-filtro-stock/${vfsCodi}/`, {
-              method: 'DELETE',
             })
           }
         }
@@ -278,8 +262,13 @@ export default function StockMotocicletasPage() {
 
   // Manejador para toggle checkbox de moto
   const handleToggleMotoCheckbox = (stkCodi: number) => {
+    // Si es una moto existente en edición, no permitir deseleccionar
+    if (filtroEditando && stkCodi in motosExistentesFiltro) {
+      return
+    }
+    
     const nuevas = { ...motosSeleccionadas }
-    if (stkCodi in nuevas) {
+    if (nuevas[stkCodi]) {
       delete nuevas[stkCodi]
     } else {
       nuevas[stkCodi] = ''  // Valor vacío hasta que el usuario lo especifique
@@ -373,33 +362,6 @@ export default function StockMotocicletasPage() {
       setFiltroEnSeleccion(null)
       setFiltroEditando(null)
     }
-  }
-
-  // Función para detectar si hay cambios en las motos seleccionadas
-  const hayChangesEnMotos = () => {
-    if (!filtroEditando) {
-      // En modo creación, hay cambios si hay motos seleccionadas
-      return Object.keys(motosSeleccionadas).length > 0
-    }
-    
-    // En modo edición, hay cambios si:
-    // 1. Hay motos nuevas (más de las que existían)
-    const hayMotosNuevas = Object.keys(motosSeleccionadas).length > Object.keys(motosExistentesFiltro).length
-    
-    // 2. Hay motos eliminadas (menos de las que existían)
-    const hayMotosEliminadas = Object.keys(motosSeleccionadas).length < Object.keys(motosExistentesFiltro).length
-    
-    // 3. Hay motos con valores cambiados
-    const hayValoresCambiados = Object.entries(motosSeleccionadas).some(([stkCodiStr, nuevoValor]) => {
-      const stkCodi = parseInt(stkCodiStr)
-      if (stkCodi in motosExistentesFiltro) {
-        const valorAnterior = motosExistentesFiltro[stkCodi]
-        return valorAnterior !== nuevoValor
-      }
-      return false
-    })
-    
-    return hayMotosNuevas || hayMotosEliminadas || hayValoresCambiados
   }
 
   return (
@@ -655,7 +617,7 @@ export default function StockMotocicletasPage() {
               <div className="flex gap-2">
                 <button
                   onClick={handleGuardarMotosDelFiltro}
-                  disabled={creandoFiltro || !hayChangesEnMotos()}
+                  disabled={creandoFiltro || (filtroEditando ? Object.keys(motosSeleccionadas).length <= Object.keys(motosExistentesFiltro).length : Object.keys(motosSeleccionadas).length === 0)}
                   className="h-8 px-3 rounded-lg bg-green-600 text-white text-xs font-semibold hover:bg-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {creandoFiltro ? 'Guardando...' : 'Guardar'}
@@ -722,8 +684,8 @@ export default function StockMotocicletasPage() {
                       item.valores_filtros && 
                       item.valores_filtros.some((vf: any) => vf.fr_codi !== filtroEnSeleccion)
                     
-                    const estaSeleccionada = motosSeleccionadas.hasOwnProperty(item.stk_codi)
-                    const estaExistente = motosExistentesFiltro.hasOwnProperty(item.stk_codi)
+                    const estaSeleccionada = item.stk_codi in motosSeleccionadas
+                    const estaExistente = item.stk_codi in motosExistentesFiltro
                     
                     let rowClass = 'border-b border-border hover:bg-accent/50'
                     if (tieneFiltroOtro) {
@@ -742,8 +704,8 @@ export default function StockMotocicletasPage() {
                               type="checkbox"
                               checked={estaSeleccionada}
                               onChange={() => handleToggleMotoCheckbox(item.stk_codi)}
-                              disabled={creandoFiltro || (tieneFiltroOtro && !estaSeleccionada)}
-                              title={tieneFiltroOtro && !estaSeleccionada ? 'Esta moto ya tiene otro filtro asignado' : ''}
+                              disabled={creandoFiltro || tieneFiltroOtro}
+                              title={tieneFiltroOtro ? 'Esta moto ya tiene otro filtro asignado' : ''}
                               className="w-4 h-4 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
                             />
                           </TableCell>
