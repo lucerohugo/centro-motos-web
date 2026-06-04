@@ -363,4 +363,4 @@ class StockListSimpleSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Stock
-        fields = ['stk_codi', 'art_codi', 'art_nomb', 'col_codi', 'col_nomb', 'art_nmot', 'art_ncha']
+        fields = ['stk_codi', 'art_codi', 'art_nomb', 'col_codi', 'col_nomb', 'art_nmot', 'art_ncha', 'art_bdis']
