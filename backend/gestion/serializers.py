@@ -358,6 +358,9 @@ class GeneralSerializer(serializers.ModelSerializer):
 # ================================================================
 class StockListSimpleSerializer(serializers.ModelSerializer):
     """Serializer simple para listar todo el stock"""
+    art_nomb = serializers.CharField(source='art_codi.art_nomb', read_only=True)
+    col_nomb = serializers.CharField(source='col_codi.col_nomb', read_only=True, allow_null=True)
+    
     class Meta:
         model = Stock
-        fields = ['stk_codi', 'art_codi', 'col_codi', 'art_nmot', 'art_ncha']
+        fields = ['stk_codi', 'art_codi', 'art_nomb', 'col_codi', 'col_nomb', 'art_nmot', 'art_ncha']
