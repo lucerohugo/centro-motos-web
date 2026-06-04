@@ -621,6 +621,23 @@ class ValorFiltroStockViewSet(BaseViewSet):
 
 
 # ================================================================
+# STOCK SIMPLE (LISTA GENERAL SIN FILTROS)
+# ================================================================
+class StockListViewSet(viewsets.ReadOnlyModelViewSet):
+    """API simple para listar TODO el stock - GET /stock/"""
+    queryset = Stock.objects.all()
+    serializer_class = StockListSimpleSerializer
+    pagination_class = None
+    lookup_field = 'stk_codi'
+    
+    @action(detail=False, methods=['get'])
+    def total(self, request):
+        """GET /stock-all/total/ - Retorna la cantidad total de items en stock"""
+        count = self.get_queryset().count()
+        return Response({'total': count})
+
+
+# ================================================================
 # LOGOS
 # ================================================================
 @api_view(['GET'])

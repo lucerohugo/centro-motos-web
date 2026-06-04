@@ -351,3 +351,13 @@ class GeneralSerializer(serializers.ModelSerializer):
                 return request.build_absolute_uri(obj.gen_loge.url)
             return obj.gen_loge.url
         return None
+
+
+# ================================================================
+# STOCK SIMPLE (LISTA GENERAL)
+# ================================================================
+class StockListSimpleSerializer(serializers.ModelSerializer):
+    """Serializer simple para listar todo el stock"""
+    class Meta:
+        model = Stock
+        fields = ['stk_codi', 'art_codi', 'col_codi', 'art_nmot', 'art_ncha']

@@ -4,7 +4,7 @@ from .views import (
     ProvinciaViewSet, LocalidadViewSet,
     MarcaViewSet, RubroViewSet, SubrubroViewSet, ColorViewSet, ComprobanteViewSet,
     RevendedorViewSet, ClientesViewSet, ArticuloViewSet,
-    UsuarioViewSet, PedidosViewSet, CondicionIvaViewSet, StockViewSet,
+    UsuarioViewSet, PedidosViewSet, CondicionIvaViewSet, StockViewSet, StockListViewSet,
     ConfirmacionVentaViewSet, GeneralViewSet, FiltroRevendedorViewSet, ValorFiltroStockViewSet,
     importar_datos, get_revendedor_logo, upload_revendedor_logo, delete_revendedor_logo
 )
@@ -29,6 +29,7 @@ router.register(r'articulos', ArticuloViewSet, basename='articulo')
 
 # Inventario
 router.register(r'stock', StockViewSet, basename='stock')
+router.register(r'stock-all', StockListViewSet, basename='stock-all')
 
 # Ventas
 router.register(r'confirmacion-venta', ConfirmacionVentaViewSet, basename='confirmacion-venta')
