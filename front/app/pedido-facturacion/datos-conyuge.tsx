@@ -56,12 +56,12 @@ export const DatosConyuge = forwardRef<DatosConyugeRef, DatosConyugeProps>(funct
     return nums.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
   }
 
-  // Formatear CUIT: 20-4313359-4
+  // Formatear CUIT: 20-12345678-9
   const formatCUIT = (value: string): string => {
-    const nums = value.replace(/\D/g, '').slice(0, 10)
+    const nums = value.replace(/\D/g, '').slice(0, 11)
     if (nums.length <= 2) return nums
-    if (nums.length <= 9) return `${nums.slice(0, 2)}-${nums.slice(2)}`
-    return `${nums.slice(0, 2)}-${nums.slice(2, 9)}-${nums.slice(9)}`
+    if (nums.length <= 10) return `${nums.slice(0, 2)}-${nums.slice(2)}`
+    return `${nums.slice(0, 2)}-${nums.slice(2, 10)}-${nums.slice(10)}`
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
