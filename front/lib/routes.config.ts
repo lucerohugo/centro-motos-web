@@ -49,6 +49,12 @@ export const ROUTES = {
   // - Lista de pedidos del revendedor
   // - Permite editar pedidos no procesados (POV_CVTA = "N")
   MIS_PEDIDOS: '/mis-pedidos',
+
+  // Sección: Importar Datos
+  // - Cuentas Bancarias (imp_dato1)
+  // - Financieras (imp_dato2)
+  CUENTAS_BANCARIAS: '/importar-datos/cuentas-bancarias',
+  FINANCIERAS: '/importar-datos/financieras',
 } as const
 
 /**

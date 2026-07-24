@@ -101,7 +101,7 @@ export function LoginForm({ onLoginSuccess, isOpen }: LoginFormProps) {
       <div className="fixed right-6 top-6">
         <ThemeToggle />
       </div>
-      <div className="w-full max-w-md rounded-lg border border-border bg-card p-6 shadow-lg">
+      <div className="w-full max-w-lg rounded-lg border border-border bg-card p-14 shadow-lg">
         <div className="flex items-center justify-center gap-3 mb-2">
           <img src="/logocm250.png" alt="Centro Motos" className="h-12 w-12 rounded" />
           <h1 className="text-2xl font-semibold text-foreground">

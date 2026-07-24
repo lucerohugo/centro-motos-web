@@ -1,7 +1,7 @@
 'use client'
 
 import Link from "next/link"
-import { FileText, Package, CreditCard, ChevronRight, UserCheck, LogOut, Loader2, ClipboardList, Settings, Upload, X, Trash2 } from "lucide-react"
+import { FileText, Package, CreditCard, ChevronRight, UserCheck, LogOut, Loader2, ClipboardList, Settings, Upload, X, Trash2, BarChart3, TrendingUp } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { ROUTES } from "@/lib/routes.config"
 import { useState, useEffect } from "react"
@@ -50,6 +50,29 @@ export default function Page() {
   const [uploadingLogo, setUploadingLogo] = useState(false)
   const [logoTimestamp, setLogoTimestamp] = useState(Date.now())
   const { general } = useGeneral()
+
+  // Función para abrir PDFs desde ImportarDatos
+  const abrirPDF = async (tipo: 'cuentas-bancarias' | 'financieras') => {
+    try {
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+      const response = await fetch(`${API_BASE}/api/gestion/importar-datos/ultima_importacion/`)
+      
+      if (response.ok) {
+        const data = await response.json()
+        const urlPDF = tipo === 'cuentas-bancarias' ? data.imp_dato1 : data.imp_dato2
+        
+        if (urlPDF) {
+          // Si la URL es relativa, agregar el base URL del API
+          const urlCompleta = urlPDF.startsWith('http') ? urlPDF : `${API_BASE}${urlPDF}`
+          window.open(urlCompleta, '_blank')
+        } else {
+          alert('No hay archivo disponible para ' + (tipo === 'cuentas-bancarias' ? 'Cuentas Bancarias' : 'Financieras'))
+        }
+      }
+    } catch (err) {
+      alert('Error al abrir el PDF')
+    }
+  }
 
   // Cargar logo fresco del backend
   const loadLogoFromBackend = async (revendedorId: number) => {
@@ -389,6 +412,33 @@ export default function Page() {
               <ChevronRight className="h-5 w-5 text-muted-foreground transition-all group-hover:text-primary group-hover:translate-x-1" strokeWidth={2} />
             </Link>
           ))}
+
+          {/* Botones de Importación - Lado a lado */}
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={() => abrirPDF('cuentas-bancarias')}
+              className="group flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-4 transition-all hover:border-primary hover:bg-accent"
+            >
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent">
+                <BarChart3 className="h-5 w-5 text-primary" strokeWidth={2} />
+              </div>
+              <span className="text-sm font-semibold text-foreground">
+                Cuentas Bancarias
+              </span>
+            </button>
+
+            <button
+              onClick={() => abrirPDF('financieras')}
+              className="group flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-4 transition-all hover:border-primary hover:bg-accent"
+            >
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent">
+                <TrendingUp className="h-5 w-5 text-primary" strokeWidth={2} />
+              </div>
+              <span className="text-sm font-semibold text-foreground">
+                Financieras
+              </span>
+            </button>
+          </div>
           
           {/* Botón Cuenta Corriente - COMENTADO
           <button
