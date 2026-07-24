@@ -2,7 +2,8 @@ from rest_framework import serializers
 from .models import (
     Provincia, Localidad, Marca, Rubro, Subrubro, Color, Comprobante,
     CondicionIva, Articulos, Revendedor, Stock, ConfirmacionVenta,
-    Clientes, Pedidos, General, Usuario, FiltroRevendedor, ValorFiltroStock
+    Clientes, Pedidos, General, Usuario, FiltroRevendedor, ValorFiltroStock,
+    ImportarDatos
 )
 
 
@@ -364,3 +365,31 @@ class StockListSimpleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Stock
         fields = ['stk_codi', 'art_codi', 'art_nomb', 'col_codi', 'col_nomb', 'art_nmot', 'art_ncha', 'art_bdis']
+
+
+# ================================================================
+# IMPORTAR DATOS
+# ================================================================
+class ImportarDatosSerializer(serializers.ModelSerializer):
+    """Serializer para importación de archivos PDF"""
+    archivos_cargados = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = ImportarDatos
+        fields = [
+            'imp_codi',
+            'imp_dato1',
+            'imp_dato2',
+            'imp_dato3',
+            'imp_dato4',
+            'imp_dato5',
+            'imp_fcre',
+            'imp_fmod',
+            'archivos_cargados'
+        ]
+        read_only_fields = ['imp_codi', 'imp_fcre', 'imp_fmod']
+
+    def get_archivos_cargados(self, obj):
+        """Retorna la cantidad de archivos cargados"""
+        archivos = [obj.imp_dato1, obj.imp_dato2, obj.imp_dato3, obj.imp_dato4, obj.imp_dato5]
+        return sum(1 for a in archivos if a)

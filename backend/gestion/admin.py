@@ -2,7 +2,8 @@ from django.contrib import admin
 from .models import (
     Provincia, Localidad, Marca, Rubro, Subrubro, Color, Comprobante,
     CondicionIva, Articulos, Revendedor, Stock, ConfirmacionVenta,
-    Clientes, Pedidos, General, Usuario, FiltroRevendedor, ValorFiltroStock
+    Clientes, Pedidos, General, Usuario, FiltroRevendedor, ValorFiltroStock,
+    ImportarDatos
 )
 
 
@@ -332,3 +333,31 @@ class ValorFiltroStockAdmin(admin.ModelAdmin):
         }),
     )
     ordering = ['stk_codi', 'fr_codi']
+
+
+# ================================================================
+# IMPORTAR DATOS
+# ================================================================
+@admin.register(ImportarDatos)
+class ImportarDatosAdmin(admin.ModelAdmin):
+    list_display = ['imp_codi', 'imp_fcre', 'imp_fmod', 'archivos_cargados']
+    list_filter = ['imp_fcre']
+    search_fields = ['imp_codi']
+    readonly_fields = ['imp_codi', 'imp_fcre', 'imp_fmod']
+    fieldsets = (
+        ('Archivos de Importación', {
+            'fields': ('imp_dato1', 'imp_dato2', 'imp_dato3', 'imp_dato4', 'imp_dato5')
+        }),
+        ('Control', {
+            'fields': ('imp_codi', 'imp_fcre', 'imp_fmod'),
+            'classes': ('collapse',)
+        }),
+    )
+    ordering = ['-imp_fcre']
+
+    def archivos_cargados(self, obj):
+        """Muestra cuántos archivos han sido cargados"""
+        archivos = [obj.imp_dato1, obj.imp_dato2, obj.imp_dato3, obj.imp_dato4, obj.imp_dato5]
+        cantidad = sum(1 for a in archivos if a)
+        return f"{cantidad}/5"
+    archivos_cargados.short_description = "Archivos cargados"

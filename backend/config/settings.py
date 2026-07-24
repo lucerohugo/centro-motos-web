@@ -11,8 +11,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ================================================================
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-dev-key')
 
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
-
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'  # True en desarrollo para servir media files
+# para pruebas locales(desarrollo descomentar el de abajo y comentar el de arriba)
 ALLOWED_HOSTS = [
     "api.centromotos.com.ar", #el viejo:"api.brixsoft.com"
     "localhost",

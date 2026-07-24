@@ -533,3 +533,56 @@ class ValorFiltroStock(models.Model):
 
     def __str__(self):
         return f"{self.stk_codi.art_codi} - {self.fr_codi.fr_nomb}: {self.vfs_valor}"
+
+# ================================================================
+# IMPORTAR DATOS (PDFs de cuentas bancarias y financiera)
+# ================================================================
+class ImportarDatos(models.Model):
+    """Importación de archivos PDF para cuentas bancarias y datos financieros"""
+    imp_codi = models.AutoField(primary_key=True)
+    
+    # Archivos principales
+    imp_dato1 = models.FileField(
+        upload_to="importaciones/bancos/",
+        blank=True,
+        null=True,
+        help_text="PDF de Cuentas Bancarias"
+    )
+    imp_dato2 = models.FileField(
+        upload_to="importaciones/financiera/",
+        blank=True,
+        null=True,
+        help_text="PDF de Datos Financiera"
+    )
+    
+    # Archivos adicionales
+    imp_dato3 = models.FileField(
+        upload_to="importaciones/otros/",
+        blank=True,
+        null=True,
+        help_text="Archivo adicional 3"
+    )
+    imp_dato4 = models.FileField(
+        upload_to="importaciones/otros/",
+        blank=True,
+        null=True,
+        help_text="Archivo adicional 4"
+    )
+    imp_dato5 = models.FileField(
+        upload_to="importaciones/otros/",
+        blank=True,
+        null=True,
+        help_text="Archivo adicional 5"
+    )
+    
+    # Control
+    imp_fcre = models.DateTimeField(auto_now_add=True, help_text="Fecha de creación")
+    imp_fmod = models.DateTimeField(auto_now=True, help_text="Fecha de modificación")
+
+    class Meta:
+        verbose_name = "Importar Datos"
+        verbose_name_plural = "Importar Datos"
+        ordering = ["-imp_fcre"]
+
+    def __str__(self):
+        return f"Importación {self.imp_codi} - {self.imp_fcre.strftime('%d/%m/%Y')}"

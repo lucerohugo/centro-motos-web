@@ -887,5 +887,100 @@ def importar_datos(request):
             "success": False,
             "error": str(e)
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
 #modifique tood el importar_datos 
+
+# ================================================================
+# IMPORTAR DATOS (PDFs - Cuentas Bancarias y Financiera)
+# ================================================================
+class ImportarDatosViewSet(BaseViewSet):
+    """ViewSet para importar archivos PDF (cuentas bancarias, datos financieros, etc.)"""
+    queryset = ImportarDatos.objects.all()
+    serializer_class = ImportarDatosSerializer
+    parser_classes = (MultiPartParser, FormParser)
+    lookup_field = 'imp_codi'
+    pagination_class = None
+
+    def get_queryset(self):
+        """Retorna los registros ordenados por fecha de creación descendente"""
+        return ImportarDatos.objects.all().order_by('-imp_fcre')
+
+    @action(detail=False, methods=['post'], parser_classes=(MultiPartParser, FormParser))
+    def upload(self, request):
+        """
+        POST /api/importar-datos/upload/
+        Permite subir archivos PDF.
+        
+        Body (form-data):
+        - imp_dato1: File (PDF) - Cuentas Bancarias
+        - imp_dato2: File (PDF) - Datos Financiera
+        - imp_dato3: File (optional)
+        - imp_dato4: File (optional)
+        - imp_dato5: File (optional)
+        """
+        try:
+            # Crear nuevo registro
+            obj = ImportarDatos.objects.create()
+            
+            # Actualizar archivos
+            for field in ['imp_dato1', 'imp_dato2', 'imp_dato3', 'imp_dato4', 'imp_dato5']:
+                if field in request.FILES:
+                    setattr(obj, field, request.FILES[field])
+            
+            obj.save()
+            
+            serializer = ImportarDatosSerializer(obj)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        except Exception as e:
+            return Response(
+                {'error': f'Error al subir archivos: {str(e)}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+    @action(detail=True, methods=['delete'])
+    def delete_file(self, request, imp_codi=None):
+        """
+        DELETE /api/importar-datos/{id}/delete_file/?file=imp_dato1
+        Elimina un archivo específico.
+        
+        Query params:
+        - file: imp_dato1, imp_dato2, imp_dato3, imp_dato4 o imp_dato5
+        """
+        try:
+            obj = self.get_object()
+            file_field = request.query_params.get('file')
+            
+            if not file_field or file_field not in ['imp_dato1', 'imp_dato2', 'imp_dato3', 'imp_dato4', 'imp_dato5']:
+                return Response(
+                    {'error': 'Parámetro "file" inválido'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Eliminar el archivo
+            field_obj = getattr(obj, file_field)
+            if field_obj:
+                field_obj.delete()
+                setattr(obj, file_field, None)
+                obj.save()
+            
+            serializer = ImportarDatosSerializer(obj)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        
+        except Exception as e:
+            return Response(
+                {'error': f'Error al eliminar archivo: {str(e)}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+    @action(detail=False, methods=['get'])
+    def ultima_importacion(self, request):
+        """
+        GET /api/importar-datos/ultima_importacion/
+        Retorna el registro más reciente de importación
+        """
+        try:
+            obj = ImportarDatos.objects.latest('imp_fcre')
+            serializer = ImportarDatosSerializer(obj)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except ImportarDatos.DoesNotExist:
+            return Response({'error': 'No hay importaciones'}, status=status.HTTP_404_NOT_FOUND)

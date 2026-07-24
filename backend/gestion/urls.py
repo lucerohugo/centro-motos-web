@@ -6,6 +6,7 @@ from .views import (
     RevendedorViewSet, ClientesViewSet, ArticuloViewSet,
     UsuarioViewSet, PedidosViewSet, CondicionIvaViewSet, StockViewSet, StockListViewSet,
     ConfirmacionVentaViewSet, GeneralViewSet, FiltroRevendedorViewSet, ValorFiltroStockViewSet,
+    ImportarDatosViewSet,
     importar_datos, get_revendedor_logo, upload_revendedor_logo, delete_revendedor_logo
 )
 
@@ -48,6 +49,9 @@ router.register(r'general', GeneralViewSet, basename='general')
 # Filtros personalizados
 router.register(r'filtros-revendedor', FiltroRevendedorViewSet, basename='filtro-revendedor')
 router.register(r'valores-filtro-stock', ValorFiltroStockViewSet, basename='valor-filtro-stock')
+
+# Importar datos (PDFs)
+router.register(r'importar-datos', ImportarDatosViewSet, basename='importar-datos')
 
 urlpatterns = [
     path('', include(router.urls)),
